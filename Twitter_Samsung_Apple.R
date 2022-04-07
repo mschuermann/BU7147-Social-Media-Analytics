@@ -21,11 +21,11 @@ library(httpuv)
 setwd("/Users/Lily/Library/Mobile Documents/com~apple~CloudDocs/Trinity College Dublin/BU7147 Social Media Analysis/Group Assignment")
 
 #### initializing keys ####
-bearer_token<-"AAAAAAAAAAAAAAAAAAAAADAsZwEAAAAApJZG862%2F2iV6P3ap%2BqLLhX0cCVU%3DUMSikoIxGoqjnRdOWbJFpTyQxKmm9TNVduC45wpUd1gf8Md8ma"
-consumer_key<-"yxWBMj9vqek0xiIpwvjpLqbOH"
-consumer_secret<-"bnlb6ANaokXQpms2ZDb46wIRGVWHuB0R22SBljL5LoVeTTdiC9"
-access_token<-"1499053441615900680-ULvq2UGGBinckDD7p81GALBXgEl8or"
-access_token_secret<-"PRTPXdgxTNpcpHl9rzlP6Kr3DyZ0XkFexaQHg98ZRrUs8"
+bearer_token<-"####"
+consumer_key<-"####"
+consumer_secret<-"####"
+access_token<-"####"
+access_token_secret<-"####"
 
 setup_twitter_oauth(consumer_key=consumer_key,
                     consumer_secret=consumer_secret,
