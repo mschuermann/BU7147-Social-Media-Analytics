@@ -12,43 +12,108 @@ library(sentimentr)
 library(syuzhet)
 library(tidyverse)
 library(tm)
+library(rtweet)
 library(SnowballC)
 library(base64enc)
 library(openssl)
 library(httpuv)
 
 #### setting the working directory ####
-setwd("/Users/Lily/Library/Mobile Documents/com~apple~CloudDocs/Trinity College Dublin/BU7147 Social Media Analysis/Group Assignment")
+setwd("/Users/Lily/Library/Mobile Documents/com~apple~CloudDocs/Trinity College Dublin/BU7147 Social Media Analysis/Group Assignment/Social-Media-Analytics")
 
 #### initializing keys ####
-bearer_token<-"####"
-consumer_key<-"####"
-consumer_secret<-"####"
-access_token<-"####"
-access_token_secret<-"####"
+bearer_token<-"#######"
+consumer_key<-"#######"
+consumer_secret<-"#######"
+access_token<-"#######"
+access_token_secret<-"#######"
 
 setup_twitter_oauth(consumer_key=consumer_key,
                     consumer_secret=consumer_secret,
                     access_token=access_token,
                     access_secret=access_token_secret)
 
+
 #### Getting Tweets about Samsung ####
-Samsung_tweets <- searchTwitter("@Samsung -filter:retweets", n=1000, lang="en", since="2022-03-19", until="2022-03-29", retryOnRateLimit = 100)
-Samsung_df <- twListToDF(Samsung_tweets)
-View(Samsung_df)
-write.csv(Samsung_df,"Samsung_df_03_2022.csv")
+stweets1 <- searchTwitter("#samsungs22 -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+sdf1 <- twListToDF(stweets1)
+View(sdf1)
+
+stweets2 <- searchTwitter("Samsung + S22 -@ShopeeID -@_arllee -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+sdf2 <- twListToDF(stweets2)
+View(sdf2)
+
+sd2_users <- sdf2 %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(sd2_users)
+sum(sd2_users$`number of tweets`)
+
+ad_tweets <- c("whitestonedome", "FromKorea5", "dome_glass", "Whitestone_DE", "whitestone_UK", "jp_whitestone", "Whitestone__FR", "WhitestoneJapan", "WhitestoneEU")
+
+sdf2_filter <- sdf2 %>%
+  filter(!screenName %in% ad_tweets)
+View(sdf2_filter)
+
+sd2_users2 <- sdf2_filter %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(sd2_users2)
+
+samsung_df <- rbind(sdf1, sdf2_filter)
+View(samsung_df)
+write.csv(samsung_df,"Samsung_df.csv")
 
 ##### Samsung: Use this dataframe from now on so we work on same data #####
-Samsung_df <- read.csv("Samsung_df_03_2022.csv")
+samsung_df <- read.csv("Samsung_df.csv")
 
 #### Getting Tweets about Apple ####
-Apple_tweets <- searchTwitter("@Apple -filter:retweets", n=1000, lang="en", since="2022-03-19", until="2022-03-29", retryOnRateLimit = 100)
-Apple_df <- twListToDF(Apple_tweets)
-View(Apple_df)
-write.csv(Apple_df,"Apple_df_03_2022.csv")
+atweets1 <- searchTwitter("iPhone + 13 -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+adf1 <- twListToDF(atweets1)
+View(adf1)
+
+adf_users <- adf1 %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(adf_users)
+
+adf_replies <- adf1 %>%
+  distinct(replyToSN, id) %>%
+  group_by(replyToSN) %>%
+  summarise("number of replies to user" = n())
+View(adf_replies)
+
+apple_ad_tweets <- c("whitestonedome", "FromKorea5", "domeglassapple")
+
+adf_filter <- adf1 %>%
+  filter(!screenName %in% apple_ad_tweets)
+View(adf_filter)
+
+atweets2 <- searchTwitter("#iphone13 -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+adf2 <- twListToDF(atweets2)
+View(adf2)
+
+adf_users2 <- adf2 %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(adf_users2)
+
+adf_replies2 <- adf2 %>%
+  distinct(replyToSN, id) %>%
+  group_by(replyToSN) %>%
+  summarise("number of replies to user" = n())
+View(adf_replies)
+
+apple_df <- rbind(adf_filter, adf2)
+
+write.csv(apple_df,"Apple_df.csv")
 
 ##### Apple: Use this dataframe from now on so we work on same data #####
-Apple_df <- read.csv("Apple_df_03_2022.csv")
+apple_df <- read.csv("Apple_df.csv")
 
 ###Samsung####
 ##### Preprocessing Tweets #####
