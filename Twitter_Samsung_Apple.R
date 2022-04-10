@@ -3,6 +3,7 @@ library(twitteR)
 library(RCurl)
 library(ROAuth)
 library(plyr)
+library(data.table)
 library(dplyr)
 library(stringr)
 library(ggplot2)
@@ -12,6 +13,7 @@ library(sentimentr)
 library(syuzhet)
 library(textclean)
 library(tidyverse)
+library(tidytext)
 library(tm)
 library(rtweet)
 library(SnowballC)
@@ -69,6 +71,8 @@ write.csv(samsung_df,"Samsung_df.csv")
 
 ##### Samsung: Use this dataframe from now on so we work on same data #####
 samsung_df <- read.csv("Samsung_df.csv")
+View(samsung_df)
+
 
 #### Getting Tweets about Apple ####
 atweets1 <- searchTwitter("iPhone + 13 -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
@@ -111,6 +115,13 @@ View(adf_replies)
 
 apple_df <- rbind(adf_filter, adf2)
 
+#there is another competition which did not need retweets or replying to someone specifically 
+#people copied the text to take part, therefore, the word "treasure" and "win" were exorbitant in our analysis
+#therefore we excluded all rows that had this text
+apple_df <- apple_df %>%
+  filter(!grepl("Join the event to win an iPhone 13!",text)) 
+View(apple_df_excl)
+
 write.csv(apple_df,"Apple_df.csv")
 
 ##### Apple: Use this dataframe from now on so we work on same data #####
@@ -118,47 +129,30 @@ apple_df <- read.csv("Apple_df.csv")
 
 ###Samsung####
 ##### Preprocessing Tweets #####
-#replace emojis with sentiment
-Samsung_df1 <- samsung_df$text %>%
-  str_to_lower() %>%
-  replace_contraction() %>%
-  replace_internet_slang() %>%
-  replace_hash(replacement = "") %>%
-  replace_word_elongation() %>%
-  replace_emoji() %>%
-  replace_emoji_identifier() %>%
-  replace_non_ascii() %>%
-  str_squish() %>%
-  str_trim()
-#remove rt
-Samsung_df2<- gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",Samsung_df1)
-#removelink
-Samsung_df3<- gsub("http[^[:blank:]]+","",Samsung_df2)
-#remove name
-Samsung_df4<-gsub("@\\u+","",Samsung_df3)
-#remove punctuations
-Samsung_df5<-gsub("[[:punct:]]"," ",Samsung_df4)
-#remove punctuations
-Samsung_df6<-gsub("[^[:alnum:]]"," ",Samsung_df5)
-#remove stop words
 stopwords_regex <- paste(stopwords('en'), collapse = '\\b|\\b')
 stopwords_regex <- paste0('\\b', stopwords_regex, '\\b')
-Samsung_df7 <- stringr::str_replace_all(Samsung_df6, stopwords_regex, '')
-Samsung_df7
 
-#not used -> Samsung_df7<- Corpus(VectorSource(Samsung_df6))
-#not used -> Samsung_df7<- tm_map(Samsung_df7, removePunctuation)
-#not used -> Samsung_df7<- tm_map(Samsung_df7, content_transformer(tolower))
-#not used -> Samsung_df7<- tm_map(Samsung_df7, removeWords, stopwords("english"))
-#not used -> Samsung_df7<- tm_map(Samsung_df7, stripWhitespace)
+Samsung_df <- samsung_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  replace_emoji() %>% #replaces emojis with the word form 
+  replace_emoji_identifier() %>% #replaces emoji identifiers to word form 
+  replace_non_ascii() %>% #replaces common non-ASCII characters. 
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  stringr::str_replace_all(stopwords_regex, '')#remove stop words
 
-##### building wordcloud #####
-pal<- brewer.pal(8,"Dark2")
-
-wordcloud(Samsung_df7, min.freq = , max.words = 1000, width=1000,
-          height=1000, random.order = FALSE, color= pal)
 ##### sentiment analysis #####
-mysentiment<- get_nrc_sentiment(Samsung_df7) 
+mysentiment<- get_nrc_sentiment(Samsung_df)
 sentimentscores<- data.frame(colSums(mysentiment[,]))
 
 ###### getting sentiment scores ######
@@ -173,54 +167,95 @@ ggplot(data=sentimentscores,aes(x=sentiment,y=score))+
   xlab("sentiment") +ylab("score")+ ggtitle("total sentiment score based on tweets about Samsung")
 
 ##### Sentimentr score ######
-sentimentr_samsung <- sentiment_by(Samsung_df7, by=NULL)
+sentimentr_samsung <- sentiment_by(Samsung_df, by=NULL)
 ggplot(data=sentimentr_samsung,aes(x=element_id,y=ave_sentiment))+
   geom_line()
 
 sentimentr_html_s <- sentimentr_samsung %>%
   sentiment_by(by=NULL)%>%
   highlight()
-extract_sentiment_terms(Samsung_df6)
+extract_sentiment_terms(Samsung_df)
 
-##### 
+##### building wordcloud #####
+pal<- brewer.pal(8,"Dark2")
+stopwords_regex <- paste(stopwords('en'), collapse = '\\b|\\b')
+stopwords_regex <- paste0('\\b', stopwords_regex, '\\b')
+
+word_s <- samsung_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  #replace_emoji() %>% #replaces emojis with the word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_emoji_identifier() %>% #replaces emoji identifiers to word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_non_ascii() %>% #replaces common non-ASCII characters. #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  stringr::str_replace_all(stopwords_regex, '')#remove stop words
+
+wordcloud(word_s, min.freq = , max.words = 1000, width=1000,
+          height=1000, random.order = FALSE, color= pal)
+
+##### Creating a plot of the positive words most frequently used #####
+bg_df_s <- data.frame(word_s)
+
+s_bigram <- bg_df_s %>%
+  unnest_tokens(output=bigrams, input=word_s, token="words", format= "text")
+
+s_bigram_counted <- s_bigram %>% count(bigrams, sort = TRUE)
+s_bigram_counted$sentiment <- get_sentiment(s_bigram_counted$bigrams)
+
+ggplot(s_bigram_counted, aes(x=bigrams, y=n))+
+  geom_col()
+s_bigram_with_sentiment <- s_bigram_counted %>%
+  mutate(weightage = sentiment*n) %>%
+  arrange(desc(weightage)) %>%
+  top_n(25)
+
+ggplot(s_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
+  geom_col()
+
+##### Creating a plot of the negative words most frequently used #####
+
+s_bigram_with_neg_sentiment <- s_bigram_counted %>%
+  mutate(weightage = sentiment*n) %>%
+  arrange(desc(weightage)) %>%
+  tail(25)
+
+ggplot(s_bigram_with_neg_sentiment, aes(x=bigrams, y=weightage))+
+  geom_col()
 
 #### Apple ####
 ##### Preprocessing Tweets #####
 #replace emojis with sentiment
-Apple_df1 <- apple_df$text %>%
-  str_to_lower() %>%
-  replace_contraction() %>%
-  replace_internet_slang() %>%
-  replace_hash(replacement = "") %>%
-  replace_word_elongation() %>%
-  replace_emoji() %>%
-  replace_emoji_identifier() %>%
-  replace_non_ascii() %>%
-  str_squish() %>%
-  str_trim()
-#remove rt
-Apple_df2<- gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",Apple_df1)
-#removelink
-Apple_df3<- gsub("http[^[:blank:]]+","",Apple_df2)
-#remove name
-Apple_df4<-gsub("@\\u+","",Apple_df3)
-#remove punctuations
-Apple_df5<-gsub("[[:punct:]]"," ",Apple_df4)
-#remove punctuations
-Apple_df6<-gsub("[^[:alnum:]]"," ",Apple_df5)
-#remove stop words
-stopwords_regex <- paste(stopwords('en'), collapse = '\\b|\\b')
-stopwords_regex <- paste0('\\b', stopwords_regex, '\\b')
-Apple_df7 <- stringr::str_replace_all(Apple_df6, stopwords_regex, '')
-Apple_df7
+Apple_df <- apple_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  replace_emoji() %>% #replaces emojis with the word form 
+  replace_emoji_identifier() %>% #replaces emoji identifiers to word form 
+  replace_non_ascii() %>% #replaces common non-ASCII characters. 
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  stringr::str_replace_all(stopwords_regex, '')#remove stop words
 
-##### building wordcloud #####
-pal<- brewer.pal(8,"Dark2")
-
-wordcloud(Apple_df7, min.freq = , max.words = 1000, width=1000,
-          height=1000, random.order = FALSE, color= pal )
 ##### sentiment analysis #####
-mysentiment_apple<- get_nrc_sentiment(Apple_df7) 
+mysentiment_apple<- get_nrc_sentiment(Apple_df) 
 sentimentscores_apple<- data.frame(colSums(mysentiment_apple[,]))
 
 ###### getting sentiment scores ######
@@ -235,14 +270,72 @@ ggplot(data=sentimentscores_apple,aes(x=sentiment,y=score))+
   xlab("sentiment") +ylab("score")+ ggtitle("total sentiment score based on tweets about Apple")
 
 ###### Sentimentr score #######
-sentimentr_apple <- sentiment_by(Apple_df7, by=NULL)
+sentimentr_apple <- sentiment_by(Apple_df, by=NULL)
 ggplot(data=sentimentr_apple,aes(x=element_id,y=ave_sentiment))+
   geom_line()
 
 sentimentr_html_a <- sentimentr_apple %>%
   sentiment_by(by=NULL)%>%
   highlight()
-extract_sentiment_terms(Apple_df7)
 
+sentiments_a <- get_sentences(Apple_df) %>%
+  extract_sentiment_terms()
+
+
+##### building wordcloud #####
+pal<- brewer.pal(8,"Dark2")
+
+word_a <- apple_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  #replace_emoji() %>% #replaces emojis with the word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_emoji_identifier() %>% #replaces emoji identifiers to word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_non_ascii() %>% #replaces common non-ASCII characters. #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  stringr::str_replace_all(stopwords_regex, '')#remove stop words
+
+wordcloud(word_a, min.freq = , max.words = 1000, width=1000,
+          height=1000, random.order = FALSE, color= pal)
+
+##### Creating a plot of the positive words most frequently used #####
+
+bg_df_a <- data.frame(word_a)
+
+a_bigram <- bg_df_a %>%
+  unnest_tokens(output=bigrams, input=word_a, token="words", format= "text")
+
+a_bigram_counted <- a_bigram %>% count(bigrams, sort = TRUE)
+a_bigram_counted$sentiment <- get_sentiment(a_bigram_counted$bigrams)
+
+ggplot(a_bigram_counted, aes(x=bigrams, y=n))+
+  geom_col()
+a_bigram_with_sentiment <- a_bigram_counted %>%
+  mutate(weightage = sentiment*n) %>%
+  arrange(desc(weightage)) %>%
+  top_n(25)
+
+ggplot(a_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
+  geom_col()
+View(apple_df)
+
+##### Creating a plot of the negative words most frequently used #####
+
+a_bigram_with_neg_sentiment <- a_bigram_counted %>%
+  mutate(weightage = sentiment*n) %>%
+  arrange(desc(weightage)) %>%
+  tail(25)
+
+ggplot(a_bigram_with_neg_sentiment, aes(x=bigrams, y=weightage))+
+  geom_col()
 
 
