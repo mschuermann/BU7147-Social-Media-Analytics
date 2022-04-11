@@ -1,25 +1,32 @@
 #### importing libraries ####
-library(twitteR)
-library(RCurl)
-library(ROAuth)
-library(plyr)
+library(base64enc)
 library(data.table)
 library(dplyr)
-library(stringr)
 library(ggplot2)
+library(ggraph)
+library(httpuv)
 library(httr)
-library(wordcloud)
+library(igraph)
+library(openssl)
+library(plyr)
+library(RCurl)
+library(ROAuth)
+library(rtweet)
 library(sentimentr)
+library(SnowballC)
+library(stringr)
 library(syuzhet)
 library(textclean)
-library(tidyverse)
+library(textmineR)
+library(tidyr)
 library(tidytext)
+library(tidyverse)
 library(tm)
-library(rtweet)
-library(SnowballC)
-library(base64enc)
-library(openssl)
-library(httpuv)
+library(topicmodels)
+library(twitteR)
+library(widyr)
+library(wordcloud)
+
 
 #### setting the working directory ####
 setwd("/Users/Lily/Library/Mobile Documents/com~apple~CloudDocs/Trinity College Dublin/BU7147 Social Media Analysis/Group Assignment/Social-Media-Analytics")
@@ -119,8 +126,8 @@ apple_df <- rbind(adf_filter, adf2)
 #people copied the text to take part, therefore, the word "treasure" and "win" were exorbitant in our analysis
 #therefore we excluded all rows that had this text
 apple_df <- apple_df %>%
-  filter(!grepl("Join the event to win an iPhone 13!",text)) 
-View(apple_df_excl)
+  filter(!grepl("Join the event to win an iPhone 13!",text))  %>%
+  filter(!grepl("rolex",text))
 
 write.csv(apple_df,"Apple_df.csv")
 
@@ -128,6 +135,17 @@ write.csv(apple_df,"Apple_df.csv")
 apple_df <- read.csv("Apple_df.csv")
 
 ###Samsung####
+##### statistics about tweets #####
+
+stats_s <- samsung_df %>%
+  mutate(date = substr(created,1,10))
+stats_s <- aggregate(cbind(count_users = screenName, count_tweets = id) ~ date, 
+          data = stats_s, 
+          FUN = function(x){n_distinct(x)})
+stats_s <- stats_s %>%
+  mutate(avg_tweets_per_user = count_tweets / count_users) %>%
+  mutate(weekday = weekdays(as.Date(date)))
+
 ##### Preprocessing Tweets #####
 stopwords_regex <- paste(stopwords('en'), collapse = '\\b|\\b')
 stopwords_regex <- paste0('\\b', stopwords_regex, '\\b')
@@ -149,7 +167,8 @@ Samsung_df <- samsung_df$text %>%
   {gsub('@\\w+', '', .)} %>% # remove at people
   {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
   {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
-  stringr::str_replace_all(stopwords_regex, '')#remove stop words
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique()#remove duplicates
 
 ##### sentiment analysis #####
 mysentiment<- get_nrc_sentiment(Samsung_df)
@@ -198,12 +217,15 @@ word_s <- samsung_df$text %>%
   {gsub('@\\w+', '', .)} %>% # remove at people
   {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
   {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
-  stringr::str_replace_all(stopwords_regex, '')#remove stop words
+  removeNumbers() %>%
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique() #remove duplicates
 
 wordcloud(word_s, min.freq = , max.words = 1000, width=1000,
           height=1000, random.order = FALSE, color= pal)
 
 ##### Creating a plot of the positive words most frequently used #####
+#ngram = 1
 bg_df_s <- data.frame(word_s)
 
 s_bigram <- bg_df_s %>%
@@ -222,7 +244,79 @@ s_bigram_with_sentiment <- s_bigram_counted %>%
 ggplot(s_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
   geom_col()
 
+#bigram, n=2
+
+s_bigram2 <- bg_df_s %>%
+  unnest_tokens(output=bigrams, input=word_s, format= "text", token = "ngrams", n=2)
+
+s_bigram2_counted <- s_bigram2 %>% count(bigrams, sort = TRUE)
+
+s_bigrams2_separated <- s_bigram2_counted %>%
+  separate(bigrams, c("word1", "word2"), sep = " ")
+
+s_bigrams2_counts <- s_bigrams2_separated %>% 
+  count(word1, word2, sort = TRUE)
+
+s_bigrams2_united <- s_bigrams2_counts %>%
+  unite(bigrams, word1, word2, sep = " ")
+
+AFINN <- get_sentiments("afinn")
+
+s_not_words <- s_bigrams2_separated %>%
+  filter(word1 == "not") %>%
+  inner_join(AFINN, by = c(word2 = "word")) %>%
+  count(word2, value, sort = TRUE)
+View(s_bigrams2_separated)
+s_not_words %>%
+  mutate(contribution = n * value) %>%
+  arrange(desc(abs(contribution))) %>%
+  head(20) %>%
+  mutate(word2 = reorder(word2, contribution)) %>%
+  ggplot(aes(n * value, word2, fill = n * value > 0)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = "Sentiment value * number of occurrences",
+       y = "Words preceded by \"not\"") 
+
+
+s_words_per_tweet <- bg_df_s %>%
+  mutate(tweet = row_number()) %>%
+  unnest_tokens(output=bigrams, input=word_s, format= "text", token = "ngrams", n=1)
+
+s_word_pairs <- s_words_per_tweet %>%
+  pairwise_count(bigrams, tweet, sort = TRUE)
+
+s_word_pairs %>%
+  filter(item1=="samsung")
+
+s_word_cors <- s_words_per_tweet %>%
+  group_by(bigrams) %>%
+  filter(n() >= 20) %>%
+  pairwise_cor(bigrams, tweet, sort = TRUE)
+
+View(s_word_cors)
+
+s_word_cors %>%
+  filter(item1 %in% c("battery", "financing", "security", "configurable")) %>%
+  group_by(item1) %>%
+  slice_max(correlation, n = 6) %>%
+  ungroup() %>%
+  mutate(item2 = reorder(item2, correlation)) %>%
+  ggplot(aes(item2, correlation)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ item1, scales = "free") +
+  coord_flip()
+
+s_word_cors %>%
+  filter(correlation > .15) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
+  geom_node_point(color = "lightblue", size = 5) +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+
 ##### Creating a plot of the negative words most frequently used #####
+
 
 s_bigram_with_neg_sentiment <- s_bigram_counted %>%
   mutate(weightage = sentiment*n) %>%
@@ -232,7 +326,65 @@ s_bigram_with_neg_sentiment <- s_bigram_counted %>%
 ggplot(s_bigram_with_neg_sentiment, aes(x=bigrams, y=weightage))+
   geom_col()
 
+##### LDA Topic Modelling #####
+options(mc.cores = 10)
+tm_parLapply_engine(parallel::mclapply)  # mclapply gets the number of cores from global options
+
+# Create corpus object
+s_corpus <- Corpus(VectorSource(bg_df_s))  
+
+# Remove English stop words.
+s_corpus <- tm_map(s_corpus, removeWords, stopwords("en"))  
+
+# Remove numbers.
+s_corpus <- tm_map(s_corpus, removeNumbers)
+
+# Stem the words.
+s_corpus <- tm_map(s_corpus, stemDocument)
+
+# Remove the stems associated with our search terms!
+s_corpus <- tm_map(s_corpus, removeWords, c("galaxi", "samsung", "galaxy", "ultra", "\"samsung", "\"galaxy", "iphone", "iphon", "\"iphon", "appl", "pro", "max"))
+
+s_doc.lengths <- rowSums(as.matrix(DocumentTermMatrix(s_corpus)))
+s_dtm <- DocumentTermMatrix(s_corpus)
+
+# Now for some topics
+SEED = sample(1:1000000, 1)  # Pick a random seed for replication
+k = 5 
+
+# This might take a minute!
+s_models <- list(
+  CTM       = CTM(s_dtm, k = k, control = list(seed = SEED, var = list(tol = 10^-4), em = list(tol = 10^-3))),
+  VEM       = LDA(s_dtm, k = k, control = list(seed = SEED)),
+  VEM_Fixed = LDA(s_dtm, k = k, control = list(estimate.alpha = FALSE, seed = SEED)),
+  Gibbs     = LDA(s_dtm, k = k, method = "Gibbs", control = list(seed = SEED, burnin = 1000,
+                                                               thin = 100,    iter = 1000))
+)
+
+# There you have it. Models now holds 4 topics. See the topicmodels API documentation for details
+
+# Top 10 terms of each topic for each model
+# Do you see any themes you can label to these "topics" (lists of words)?
+lapply(s_models, terms, 10)
+
+s_assignments <- sapply(s_models, topics) 
+
+s_assignments
+
 #### Apple ####
+##### Statistics about dataset #####
+stats_a <- apple_df %>%
+  mutate(date = substr(created,1,10))
+stats_a <- aggregate(cbind(count_users = screenName, count_tweets = id) ~ date, 
+                     data = stats_a, 
+                     FUN = function(x){n_distinct(x)})
+stats_a <- stats_a %>%
+  mutate(avg_tweets_per_user = count_tweets / count_users) %>%
+  mutate(weekday = weekdays(as.Date(date)))
+stats_a
+
+View(apple_df)
+
 ##### Preprocessing Tweets #####
 #replace emojis with sentiment
 Apple_df <- apple_df$text %>%
@@ -252,7 +404,8 @@ Apple_df <- apple_df$text %>%
   {gsub('@\\w+', '', .)} %>% # remove at people
   {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
   {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
-  stringr::str_replace_all(stopwords_regex, '')#remove stop words
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique() #remove duplicates
 
 ##### sentiment analysis #####
 mysentiment_apple<- get_nrc_sentiment(Apple_df) 
@@ -281,7 +434,6 @@ sentimentr_html_a <- sentimentr_apple %>%
 sentiments_a <- get_sentences(Apple_df) %>%
   extract_sentiment_terms()
 
-
 ##### building wordcloud #####
 pal<- brewer.pal(8,"Dark2")
 
@@ -302,7 +454,9 @@ word_a <- apple_df$text %>%
   {gsub('@\\w+', '', .)} %>% # remove at people
   {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
   {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
-  stringr::str_replace_all(stopwords_regex, '')#remove stop words
+  removeNumbers() %>%
+  stringr::str_replace_all(stopwords_regex, '')%>% #remove stop words
+  unique() #remove duplicates
 
 wordcloud(word_a, min.freq = , max.words = 1000, width=1000,
           height=1000, random.order = FALSE, color= pal)
@@ -338,4 +492,116 @@ a_bigram_with_neg_sentiment <- a_bigram_counted %>%
 ggplot(a_bigram_with_neg_sentiment, aes(x=bigrams, y=weightage))+
   geom_col()
 
+## bigrams, n=2
 
+a_bigram2 <- bg_df_a %>%
+  unnest_tokens(output=bigrams, input=word_a, format= "text", token = "ngrams", n=2)
+
+a_bigram2_counted <- a_bigram2 %>% count(bigrams, sort = TRUE)
+
+a_bigrams2_separated <- a_bigram2_counted %>%
+  separate(bigrams, c("word1", "word2"), sep = " ")
+
+a_bigrams2_counts <- a_bigrams2_separated %>% 
+  count(word1, word2, sort = TRUE)
+
+a_bigrams2_united <- a_bigrams2_counts %>%
+  unite(bigrams, word1, word2, sep = " ")
+
+AFINN <- get_sentiments("afinn")
+
+a_not_words <- a_bigrams2_separated %>%
+  filter(word1 == "not") %>%
+  inner_join(AFINN, by = c(word2 = "word")) %>%
+  count(word2, value, sort = TRUE)
+View(a_bigrams2_separated)
+a_not_words %>%
+  mutate(contribution = n * value) %>%
+  arrange(desc(abs(contribution))) %>%
+  head(20) %>%
+  mutate(word2 = reorder(word2, contribution)) %>%
+  ggplot(aes(n * value, word2, fill = n * value > 0)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = "Sentiment value * number of occurrences",
+       y = "Words preceded by \"not\"") 
+
+a_words_per_tweet <- bg_df_a %>%
+  mutate(tweet = row_number()) %>%
+  unnest_tokens(output=bigrams, input=word_a, format= "text", token = "ngrams", n=1)
+
+a_word_pairs <- a_words_per_tweet %>%
+  pairwise_count(bigrams, tweet, sort = TRUE)
+
+a_word_pairs %>%
+  filter(item1=="apple")
+
+a_word_cors <- a_words_per_tweet %>%
+  group_by(bigrams) %>%
+  filter(n() >= 20) %>%
+  pairwise_cor(bigrams, tweet, sort = TRUE)
+
+View(a_word_cors)
+
+a_word_cors %>%
+  filter(item1 %in% c("battery", "update", "charge", "configurable")) %>%
+  group_by(item1) %>%
+  slice_max(correlation, n = 6) %>%
+  ungroup() %>%
+  mutate(item2 = reorder(item2, correlation)) %>%
+  ggplot(aes(item2, correlation)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ item1, scales = "free") +
+  coord_flip()
+
+a_word_cors %>%
+  filter(correlation > .15) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
+  geom_node_point(color = "lightblue", size = 5) +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+
+
+##### LDA Topic Modelling #####
+options(mc.cores = 10)
+tm_parLapply_engine(parallel::mclapply)  # mclapply gets the number of cores from global options
+
+# Create corpus object
+a_corpus <- Corpus(VectorSource(bg_df_a))  
+
+# Remove English stop words.
+a_corpus <- tm_map(a_corpus, removeWords, stopwords("en"))  
+
+# Remove numbers.
+a_corpus <- tm_map(a_corpus, removeNumbers)
+
+# Stem the words.
+a_corpus <- tm_map(a_corpus, stemDocument)
+
+# Remove the stems associated with our search terms!
+a_corpus <- tm_map(a_corpus, removeWords, c("galaxi", "samsung", "galaxy", "ultra", "\"samsung", "\"galaxy", "iphone", "iphon", "\"iphon", "appl", "pro", "max"))
+
+a_doc.lengths <- rowSums(as.matrix(DocumentTermMatrix(a_corpus)))
+a_dtm <- DocumentTermMatrix(a_corpus)
+
+# Now for some topics
+SEED = sample(1:1000000, 1)  # Pick a random seed for replication
+k = 5 
+
+# This might take a minute!
+a_models <- list(
+  CTM       = CTM(a_dtm, k = k, control = list(seed = SEED, var = list(tol = 10^-4), em = list(tol = 10^-3))),
+  VEM       = LDA(a_dtm, k = k, control = list(seed = SEED)),
+  VEM_Fixed = LDA(a_dtm, k = k, control = list(estimate.alpha = FALSE, seed = SEED)),
+  Gibbs     = LDA(a_dtm, k = k, method = "Gibbs", control = list(seed = SEED, burnin = 1000,
+                                                                 thin = 100,    iter = 1000))
+)
+
+# Top 10 terms of each topic for each model
+# Do you see any themes you can label to these "topics" (lists of words)?
+lapply(a_models, terms, 10)
+
+a_assignments <- sapply(a_models, topics) 
+
+a_assignments
