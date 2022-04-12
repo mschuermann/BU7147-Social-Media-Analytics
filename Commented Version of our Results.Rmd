@@ -1,0 +1,419 @@
+---
+title: "Brand Analysis of Samsung S22 and Apple iPhone 13 - A Comparison"
+authors: Mohit Rathod, Shruthi Yamajala, Zhiyu Wu, Marie Lisanne Schürmann
+output: html_notebook
+---
+
+# Twitter Analysis
+
+```{r}
+library(base64enc)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(ggraph)
+library(httpuv)
+library(httr)
+library(igraph)
+library(openssl)
+library(plyr)
+library(RCurl)
+library(ROAuth)
+library(rtweet)
+library(sentimentr)
+library(SnowballC)
+library(stringr)
+library(syuzhet)
+library(textclean)
+library(textmineR)
+library(tidyr)
+library(tidytext)
+library(tidyverse)
+library(tm)
+library(topicmodels)
+library(twitteR)
+library(widyr)
+library(wordcloud)
+```
+
+```{r}
+#### setting the working directory ####
+setwd("/Users/Lily/Library/Mobile Documents/com~apple~CloudDocs/Trinity College Dublin/BU7147 Social Media Analysis/Group Assignment/Social-Media-Analytics")
+
+#### initializing keys ####
+bearer_token<-"#######"
+consumer_key<-"#######"
+consumer_secret<-"#######"
+access_token<-"#######"
+access_token_secret<-"#######"
+
+setup_twitter_oauth(consumer_key=consumer_key,
+                    consumer_secret=consumer_secret,
+                    access_token=access_token,
+                    access_secret=access_token_secret)
+
+
+
+```
+
+## Data Extraction and Cleaning
+
+### Samsung S22
+
+We decided to extract data from Twitter with the keywords "Samsung S22" and the hashtag "\#samsungs22" from 31.03.2022 - 08.04.2022 as we do not have a premium license to get access to the full timeline of tweets on the TwitterAPI.
+
+We excluded from our query the users ShopeeID, \_arllee and all retweets for the keywords "Samsung S22" because there were multiple thousands of tweets about a competition to win a Samsung mobile phone which caused a lot of duplicated data.
+
+As well, we identified nine users which were creating advertising spam and non-valuable tweets that we had to exclude: "whitestonedome", "FromKorea5", "dome_glass", "Whitestone_DE", "whitestone_UK", "jp_whitestone", "Whitestone\_\_FR", "WhitestoneJapan", "WhitestoneEU".
+
+In total we could gather 3846 tweets.
+
+```{r Extracting Tweets about Samsung from Twitter, eval=FALSE, include=FALSE}
+#### Getting Tweets about Samsung ####
+stweets1 <- searchTwitter("#samsungs22 -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+sdf1 <- twListToDF(stweets1)
+View(sdf1)
+
+stweets2 <- searchTwitter("Samsung + S22 -@ShopeeID -@_arllee -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+sdf2 <- twListToDF(stweets2)
+View(sdf2)
+
+sd2_users <- sdf2 %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(sd2_users)
+sum(sd2_users$`number of tweets`)
+
+ad_tweets <- c("whitestonedome", "FromKorea5", "dome_glass", "Whitestone_DE", "whitestone_UK", "jp_whitestone", "Whitestone__FR", "WhitestoneJapan", "WhitestoneEU")
+
+sdf2_filter <- sdf2 %>%
+  filter(!screenName %in% ad_tweets)
+View(sdf2_filter)
+
+sd2_users2 <- sdf2_filter %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(sd2_users2)
+
+samsung_df <- rbind(sdf1, sdf2_filter)
+View(samsung_df)
+write.csv(samsung_df,"Samsung_df.csv")
+```
+
+Our initial data frame has 17 attributes. You can find the meaning of each of the attributes here on the [Twitter Developer Platform](https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/tweet).
+
+```{r}
+##### Samsung: Use this dataframe from now on so we work on same data #####
+samsung_df <- read.csv("Samsung_df.csv")
+head(samsung_df)
+```
+
+In the following code we checked that the data.frame was correctly formatted:
+
+```{r}
+str(samsung_df)
+```
+
+### Apple iPhone 13
+
+We extracted data for the search terms "iPhone 13" excluding retweets and the hashtag "\#iphone13" from the TwitterAPI. Similarly, to the Samsung S22 we had to exclude certain users which were advertising ("whitestonedome", "FromKorea5", "domeglassapple") and competitions to win an iPhone when retweeting or copy-pasting a specific text ("Join the event to win an iPhone 13!"). Also, we had a high number of tweets which were randomly posting brand names, e.g. "rolex iphone" in one tweet.
+
+In total we could gather 8369 tweets.
+
+```{r}
+#### Getting Tweets about Apple ####
+atweets1 <- searchTwitter("iPhone + 13 -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+adf1 <- twListToDF(atweets1)
+View(adf1)
+
+adf_users <- adf1 %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(adf_users)
+
+adf_replies <- adf1 %>%
+  distinct(replyToSN, id) %>%
+  group_by(replyToSN) %>%
+  summarise("number of replies to user" = n())
+View(adf_replies)
+
+apple_ad_tweets <- c("whitestonedome", "FromKorea5", "domeglassapple")
+
+adf_filter <- adf1 %>%
+  filter(!screenName %in% apple_ad_tweets)
+View(adf_filter)
+
+atweets2 <- searchTwitter("#iphone13 -filter:retweets", n=10000, lang="en", retryOnRateLimit = 100)
+adf2 <- twListToDF(atweets2)
+View(adf2)
+
+adf_users2 <- adf2 %>%
+  distinct(screenName, id) %>%
+  group_by(screenName) %>%
+  summarise("number of tweets" = n())
+View(adf_users2)
+
+adf_replies2 <- adf2 %>%
+  distinct(replyToSN, id) %>%
+  group_by(replyToSN) %>%
+  summarise("number of replies to user" = n())
+View(adf_replies)
+
+apple_df <- rbind(adf_filter, adf2)
+
+#there is another competition which did not need retweets or replying to someone specifically 
+#people copied the text to take part, therefore, the word "treasure" and "win" were exorbitant in our analysis
+#therefore we excluded all rows that had this text
+apple_df <- apple_df %>%
+  filter(!grepl("Join the event to win an iPhone 13!",text))  %>%
+  filter(!grepl("rolex",text))
+
+write.csv(apple_df,"Apple_df.csv")
+```
+
+Our initial data frame has 17 attributes. You can find the meaning of each of the attributes here on the [Twitter Developer Platform](https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/tweet).
+
+```{r}
+##### Apple: Use this dataframe from now on so we work on same data #####
+apple_df <- read.csv("Apple_df.csv")
+head(apple_df)
+
+```
+
+In the following code we checked that the data.frame was correctly formatted:
+
+```{r}
+str(apple_df)
+```
+
+## How Many Users Were Posting How Many Tweets in the Dataset?
+
+## Samsung S22
+
+```{r include=FALSE}
+stats_s <- samsung_df %>%
+  mutate(date = substr(created,1,10))
+stats_s <- aggregate(cbind(count_users = screenName, count_tweets = id) ~ date, 
+          data = stats_s, 
+          FUN = function(x){n_distinct(x)})
+stats_s <- stats_s %>%
+  mutate(avg_tweets_per_user = count_tweets / count_users) %>%
+  mutate(weekday = weekdays(as.Date(date)))
+stats_s <- data.frame(stats_s)
+stats_s
+
+```
+
+## Apple iPhone 13
+
+```{r include=FALSE}
+stats_a <- apple_df %>%
+  mutate(date = substr(created,1,10))
+stats_a <- aggregate(cbind(count_users = screenName, count_tweets = id) ~ date, 
+                     data = stats_a, 
+                     FUN = function(x){n_distinct(x)})
+stats_a <- stats_a %>%
+  mutate(avg_tweets_per_user = count_tweets / count_users) %>%
+  mutate(weekday = weekdays(as.Date(date)))
+stats_a <- data.frame(stats_a)
+stats_a
+```
+
+## Insights
+
+While there were only 3846 tweets from users about the Samsung S22, there were 2.17 times more tweets about the Apple iPhone 13 during the period considered.
+
+```{r echo=FALSE}
+ggplot() + 
+  geom_line(data=stats_s, aes(x=date, y = count_tweets, color = "Samsung S22", group = 1)) + 
+  geom_line(data=stats_a, aes(x=date, y = count_tweets, color = "Apple iPhone 13", group = 1)) +
+  geom_point(data=stats_s, aes(x=date, y=count_users, color ="Samsung S22", group=1))+
+  geom_point(data=stats_a, aes(x=date, y=count_users, color ="Apple iPhone 13", group=1)) +
+  ylab("Number of Tweets or Users") +
+  xlab("date") +
+  ggtitle("The Number of Users (points) and Tweets (line) over Time")
+```
+
+On 3 out of 9 days Samsung S22 had more tweets than iPhone 13. On the other days Apple exceeded the number of tweets extremely. Surprisingly, the number of tweets and users per day for the Samsung S22 remains constant while there are only a few tweets about the iPhone 13 in the first 3 days and a high volume of tweets from 3nd April until 7th April 2022. There was not only more tweets but also a larger group of users posting about iPhone 13. We could not identify a specific reason for this phenomenon because the last official Apple event was in March 2022 and not in the time period we tested.
+
+There is no similar indicator from [Google Trends](https://trends.google.com/trends/explore?date=2022-03-31%202022-04-08&q=iPhone%2013,Samsung%20S22,Apple,Samsung) or other sources. The search terms iPhone 13, Samsung S22, Apple and Samsung are relatively constant over time as you can see from the image below (Screenshot from Google Trends). It can be noted that Apple is more likely to be looked up than Samsung as well as the iPhone 13 is more popular on Google Search than Samsung S22. This gives us a first impression that the iPhone 13 model receives in general more attention.
+
+![](images/paste-2D5004C2.png)
+
+There are more tweets than users which indicates that some users usually post more than one tweet. We calculated a ratio for this: `avg_tweets_per_user = tweets per day / users per day`.
+
+```{r echo=FALSE}
+comp_tw_p_u <- data.frame(date=paste(date=substr(stats_a$date,6,10), weekday=stats_a$weekday), stats_a$avg_tweets_per_user, stats_s$avg_tweets_per_user)
+ggplot()+
+  geom_line(data=comp_tw_p_u, aes(x=date, y=stats_a.avg_tweets_per_user, group=1, color="Apple"))+ 
+  geom_line(data=comp_tw_p_u, aes(x=date, y=stats_s.avg_tweets_per_user, group=1, color="Samsung"))+
+  theme(axis.text = element_text(size = 5))+
+  ylab("Average tweet per user")
+```
+
+It is interesting though there were less conversation about Apple in the first three days, there were statistically more people involved, so it seems to be a conversation between a smaller group of users.
+
+## Sentiment Analysis
+
+### Preprocessing Tweets
+
+We decided to preprocess the data based on the following steps:
+
+-   All text was converted to lower case, e.g. Hello to hello.
+
+-   All contractions were converted to the longer form, e.g. don't to do not
+
+-   All common internet slang was converted to formal English, e.g. TGIF to Thanks God it is Friday
+
+-   Hashtags (\#) were removed
+
+-   Word elongation was replaced to the usual word form, e.g. heeeeey to hey
+
+-   Emojis were replaced by the word form, e.g. Smiling emoji to smiling
+
+-   Emoji Identifier were replaced by the word form, e.g. :-) to smiling
+
+-   All non-ASCII characters were replaced with equivalent or removed, **©** to (C)
+
+-   White space within the string is reduced to one white space
+
+-   White space at the start and end of the string was removed
+
+-   "RT", implicating that its a retweet was removed
+
+-   all links were removed based on the start of "http"
+
+-   all @username were removed
+
+-   punctuation were removed
+
+-   stop words were removed based on the RegEx approach
+
+#### Samsung S22 data
+
+```{r}
+stopwords_regex <- paste(stopwords('en'), collapse = '\\b|\\b')
+stopwords_regex <- paste0('\\b', stopwords_regex, '\\b')
+
+Samsung_df <- samsung_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  replace_emoji() %>% #replaces emojis with the word form 
+  replace_emoji_identifier() %>% #replaces emoji identifiers to word form 
+  replace_non_ascii() %>% #replaces common non-ASCII characters. 
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique()#remove duplicates
+
+tail(Samsung_df)
+```
+
+#### Apple iPhone 13 data
+
+```{r}
+Apple_df <- apple_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  replace_emoji() %>% #replaces emojis with the word form 
+  replace_emoji_identifier() %>% #replaces emoji identifiers to word form 
+  replace_non_ascii() %>% #replaces common non-ASCII characters. 
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique() #remove duplicates
+tail(Apple_df)
+```
+
+### Sentiments in Tweets
+
+The sentiment analysis
+
+```{r echo=FALSE}
+##### sentiment analysis #####
+mysentiment<- get_nrc_sentiment(Samsung_df)
+sentimentscores<- data.frame(colSums(mysentiment[,]))
+
+###### getting sentiment scores ######
+names(sentimentscores)<-"score"
+sentimentscores<-cbind("sentiment"=rownames(sentimentscores),sentimentscores)
+rownames(sentimentscores)<-NULL
+
+###### plotting sentiment scores ######
+ggplot(data=sentimentscores,aes(x=sentiment,y=score))+
+  geom_bar(aes(fill=sentiment),stat="identity")+ 
+  theme(legend.position = "none")+
+  xlab("sentiment") +ylab("score")+ ggtitle("Total Sentiment Score based on Tweets about Samsung")
+```
+
+```{r echo=FALSE}
+##### sentiment analysis #####
+mysentiment_apple<- get_nrc_sentiment(Apple_df) 
+sentimentscores_apple<- data.frame(colSums(mysentiment_apple[,]))
+
+###### getting sentiment scores ######
+names(sentimentscores_apple)<-"score"
+sentimentscores_apple<-cbind("sentiment"=rownames(sentimentscores_apple),sentimentscores_apple)
+rownames(sentimentscores_apple)<-NULL
+
+###### plotting sentiment scores ######
+ggplot(data=sentimentscores_apple,aes(x=sentiment,y=score))+
+  geom_bar(aes(fill=sentiment),stat="identity")+ 
+  theme(legend.position = "none")+
+  xlab("sentiment") +ylab("score")+ ggtitle("Total Sentiment Score based on Tweets about Apple")
+```
+
+```{r echo=FALSE}
+relative_comp_sentiment <- data.frame(Sentiment = sentimentscores_apple$sentiment, Apple_iPhone_13 = sentimentscores_apple$score/sum(sentimentscores_apple$score)*100, Samsung_S22 = sentimentscores$score/sum(sentimentscores$score)*100) %>%
+  melt(id.vars = 1, variable.name = "variable",
+           value.name="score")
+
+ggplot(relative_comp_sentiment, aes(x= Sentiment, y= score, fill=variable)) +
+  geom_bar(position="dodge",  stat="identity") +
+  xlab("sentiment") +ylab("percentage")+ ggtitle("Total Sentiment Score based on Tweets about Apple and Samsung")
+```
+
+On the first look, sentiments are similar for both smartphone models and are commented on with highly positive sentiments. This means that on both models, users are generally speaking positively about their smartphone.
+
+Samsung S22 has more trust and anticipation while iPhone 13 brings more joy to its users but also more sadness, surprise, fear and disgust. We can see from this that iPhone 13 users are in general more emotional - in a negative and positive direction - than Samsung S22 users.
+
+```{r}
+###### Sentimentr score #######
+sentimentr_apple <- sentiment_by(Apple_df, by=NULL)
+ggplot(data=sentimentr_apple,aes(x=element_id,y=ave_sentiment))+
+  geom_line()
+
+```
+
+```{r eval=FALSE, include=FALSE}
+sentimentr_html_a <- sentimentr_apple %>%
+  sentiment_by(by=NULL)%>%
+  highlight()
+```
+
+```{r}
+sentiments_a <- get_sentences(Apple_df) %>%
+  extract_sentiment_terms()
+sentiment_word_a <- data.frame(unique(sentiments_a$negative))
+```
