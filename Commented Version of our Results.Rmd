@@ -1,12 +1,14 @@
 ---
 title: "Brand Analysis of Samsung S22 and Apple iPhone 13 - A Comparison"
 authors: Mohit Rathod, Shruthi Yamajala, Zhiyu Wu, Marie Lisanne Schürmann
-output: html_notebook
+output:
+  html_notebook: default
+  pdf_document: default
 ---
 
 # Twitter Analysis
 
-```{r}
+```{r include=FALSE}
 library(base64enc)
 library(data.table)
 library(dplyr)
@@ -22,6 +24,7 @@ library(ROAuth)
 library(rtweet)
 library(sentimentr)
 library(SnowballC)
+library(stopwords)
 library(stringr)
 library(syuzhet)
 library(textclean)
@@ -191,7 +194,7 @@ str(apple_df)
 
 ## How Many Users Were Posting How Many Tweets in the Dataset?
 
-## Samsung S22
+### Samsung S22
 
 ```{r include=FALSE}
 stats_s <- samsung_df %>%
@@ -207,7 +210,7 @@ stats_s
 
 ```
 
-## Apple iPhone 13
+### Apple iPhone 13
 
 ```{r include=FALSE}
 stats_a <- apple_df %>%
@@ -222,7 +225,7 @@ stats_a <- data.frame(stats_a)
 stats_a
 ```
 
-## Insights
+### Insights
 
 While there were only 3846 tweets from users about the Samsung S22, there were 2.17 times more tweets about the Apple iPhone 13 during the period considered.
 
@@ -254,7 +257,7 @@ ggplot()+
   ylab("Average tweet per user")
 ```
 
-It is interesting though there were less conversation about Apple in the first three days, there were statistically more people involved, so it seems to be a conversation between a smaller group of users.
+It is interesting though there were less conversation about Apple in the first three days, there were statistically more people involved, so it seems to be a conversation between a smaller group of users. We see the same for Samsung S22 between 4th April to 6th April 2022.
 
 ## Sentiment Analysis
 
@@ -315,6 +318,7 @@ Samsung_df <- samsung_df$text %>%
   {gsub('@\\w+', '', .)} %>% # remove at people
   {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
   {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  {gsub("pro"," ",.)}%>%#removes the word "pro" because its a different context herein
   stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
   unique()#remove duplicates
 
@@ -341,8 +345,11 @@ Apple_df <- apple_df$text %>%
   {gsub('@\\w+', '', .)} %>% # remove at people
   {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
   {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  {gsub("pro"," ",.)}%>%#removes the word "pro" because its a different context herein
   stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
   unique() #remove duplicates
+  
+  
 tail(Apple_df)
 ```
 
@@ -384,36 +391,197 @@ ggplot(data=sentimentscores_apple,aes(x=sentiment,y=score))+
   xlab("sentiment") +ylab("score")+ ggtitle("Total Sentiment Score based on Tweets about Apple")
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 relative_comp_sentiment <- data.frame(Sentiment = sentimentscores_apple$sentiment, Apple_iPhone_13 = sentimentscores_apple$score/sum(sentimentscores_apple$score)*100, Samsung_S22 = sentimentscores$score/sum(sentimentscores$score)*100) %>%
   melt(id.vars = 1, variable.name = "variable",
            value.name="score")
 
 ggplot(relative_comp_sentiment, aes(x= Sentiment, y= score, fill=variable)) +
   geom_bar(position="dodge",  stat="identity") +
-  xlab("sentiment") +ylab("percentage")+ ggtitle("Total Sentiment Score based on Tweets about Apple and Samsung")
+  xlab("sentiment") +ylab("percentage")+ ggtitle("Relative Sentiment Score based on Tweets about Apple and Samsung")
 ```
 
 On the first look, sentiments are similar for both smartphone models and are commented on with highly positive sentiments. This means that on both models, users are generally speaking positively about their smartphone.
 
 Samsung S22 has more trust and anticipation while iPhone 13 brings more joy to its users but also more sadness, surprise, fear and disgust. We can see from this that iPhone 13 users are in general more emotional - in a negative and positive direction - than Samsung S22 users.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 ###### Sentimentr score #######
 sentimentr_apple <- sentiment_by(Apple_df, by=NULL)
-ggplot(data=sentimentr_apple,aes(x=element_id,y=ave_sentiment))+
+# You can see the sentiment per tweet ID:
+ggplot(data=sentimentr_apple,aes(x=element_id,y=ave_sentiment, color=ave_sentiment))+
   geom_line()
+# You can see the summary of minimum, IQR, median and mean for all variables. For us, word_count and ave_sentiment are mostly interesting:
+summary(sentimentr_apple)
 
+# You can see the variance and standard deviation for the Sentiment Score & Word Count:
+data.frame(" "= c("Average", "Variance", "Standard Deviation"),
+"Sentiment Score" = c(round(mean(sentimentr_apple$ave_sentiment),2), round(var(sentimentr_apple$ave_sentiment),2),
+round(sd(sentimentr_apple$ave_sentiment),2)), 
+"Word Count"=c(round(mean(sentimentr_apple$word_count),2), round(var(sentimentr_apple$word_count),2),
+round(sd(sentimentr_apple$word_count),2)))
 ```
 
+```{r message=FALSE, warning=FALSE}
+##### Sentimentr score ######
+sentimentr_samsung <- sentiment_by(Samsung_df, by=NULL)
+# You can see the sentiment per tweet ID:
+ggplot(data=sentimentr_samsung,aes(x=element_id,y=ave_sentiment, color=ave_sentiment))+
+  geom_line()
+
+# You can see the summary of minimum, IQR, median and mean for all variables. For us, word_count and ave_sentiment are mostly interesting:
+summary(sentimentr_samsung)
+
+# You can see the variance and standard deviation for the Sentiment Score & Word Count:
+data.frame(" "= c("Average", "Variance", "Standard Deviation"),
+"Sentiment Score" = c(round(mean(sentimentr_samsung$ave_sentiment),2), round(var(sentimentr_samsung$ave_sentiment),2),
+round(sd(sentimentr_samsung$ave_sentiment),2)), 
+"Word Count"=c(round(mean(sentimentr_samsung$word_count),2), round(var(sentimentr_samsung$word_count),2),
+round(sd(sentimentr_samsung$word_count),2)))
+```
+
+Samsung S22 tweets were on average 10.4 words long while Apple iPhone 13 tweets had 9.9 words. The tweet with the maximum number of words was about iPhone 13 with 135 identified words. Samsung S22 with 34 words maximum words is quite shorter.
+
+The sentimentr package in R estimates the sentiment polarity by sentence. The average sentiment for iPhone 13 was higher distributed with a range from -1.6 to +1.9 with its average at 0.26 while Samsung had a sentiment polarity from -1.1 to +1.6 with its average at 0.15. The higher variance within the data is identical to our findings from the plot "Relative Sentiment Score based on Tweets about Apple and Samsung" earlier. We assume that people are emotionally more dependent on their iPhone 13 than Samsung S22.
+
+To see the sentiments per tweet, generate this HTML files:
+
 ```{r eval=FALSE, include=FALSE}
+# HTML with all tweets highlighted by its sentiment polarity score:
+
+# Apple iPhone 13
 sentimentr_html_a <- sentimentr_apple %>%
   sentiment_by(by=NULL)%>%
   highlight()
+
+# Samsung S22
+sentimentr_html_s <- sentimentr_samsung %>%
+  sentiment_by(by=NULL)%>%
+  highlight()
+
+```
+
+### Sentiment Terms
+
+Now we want to extract the sentiment terms for both phones.
+
+#### Samsung S22
+
+```{r message=FALSE, warning=FALSE}
+sentimentterms_s <- attributes(extract_sentiment_terms(Samsung_df))$count %>%
+  mutate(weight_in_perc = round(polarity*n/sum(polarity*n)*100,digits=2)) %>%
+  arrange(desc(weight_in_perc)) %>%
+  filter(abs(polarity)>0.01)
+
+head(sentimentterms_s,10)
 ```
 
 ```{r}
-sentiments_a <- get_sentences(Apple_df) %>%
-  extract_sentiment_terms()
-sentiment_word_a <- data.frame(unique(sentiments_a$negative))
+tail(sentimentterms_s,10)
+```
+
+#### Apple iPhone 13
+
+```{r message=FALSE, warning=FALSE}
+sentimentterms_a <- attributes(extract_sentiment_terms(Apple_df))$count %>%
+  mutate(weight_in_perc = round(polarity*n/sum(polarity*n)*100,digits=2)) %>%
+  arrange(desc(weight_in_perc)) %>%
+  filter(abs(polarity)>0.01)
+
+head(sentimentterms_a, 10)
+```
+
+```{r}
+tail(sentimentterms_a,10)
+```
+
+#### Insights
+
+## Wordcloud
+
+### Data Preprocessing
+
+We need to preprocess data again because we do not want specific data cleaning that we did for the sentiment analysis in our wordcloud, e.g. emojis that were transformed to words like "crying" should not be included.
+
+```{r include=FALSE}
+##### building wordcloud #####
+pal<- brewer.pal(8,"Dark2")
+stopwords_regex <- paste(stopwords('en'), collapse = '\\b|\\b')
+stopwords_regex <- paste0('\\b', stopwords_regex, '\\b')
+```
+
+```{r}
+word_s <- samsung_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  #replace_emoji() %>% #replaces emojis with the word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_emoji_identifier() %>% #replaces emoji identifiers to word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_non_ascii() %>% #replaces common non-ASCII characters. #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  removeNumbers() %>%
+  removeWords(stopwords("english")) %>%
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique() #remove duplicates
+```
+
+```{r}
+word_a <- apple_df$text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  #replace_emoji() %>% #replaces emojis with the word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_emoji_identifier() %>% #replaces emoji identifiers to word form #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  #replace_non_ascii() %>% #replaces common non-ASCII characters. #we eliminate this from word preprocessing because we don't want emoji words to be within the word cloud
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  removeNumbers() %>%
+  removeWords(stopwords("english")) %>%
+  stringr::str_replace_all(stopwords_regex, '')%>% #remove stop words
+  unique() #remove duplicates
+```
+
+### Results
+
+```{r Wordcloud Samsung, message=FALSE, warning=FALSE}
+wordcloud(word_s, min.freq = 60, max.words = 40, random.order = FALSE, color= pal)
+```
+
+Samsung S22 users mentioned Samsung, Galaxy (which is the series of the S22) and Ultra (which is a specific model). The Ultra model is comparable to the iPhone 13 Pro.
+
+Other words often mentioned:
+
+-   camera
+
+-   security
+
+-   mediatek
+
+-   update
+
+-   screen
+
+-   video
+
+-   pixel
+
+```{r Wordcloud Apple, message=FALSE, warning=FALSE}
+wordcloud(word_a, min.freq = 60, max.words = 40, random.order = FALSE, color= pal)
 ```
