@@ -71,7 +71,7 @@ Source: <https://www.tomsguide.com/face-off/samsung-galaxy-s22-vs-iphone-13>
 
 -   Brand Perception is the result of experiences from a customer with the business
 
-    -   Questions here!!
+    -   
 
 -   Product Analysis
 
@@ -82,8 +82,6 @@ Source: <https://www.tomsguide.com/face-off/samsung-galaxy-s22-vs-iphone-13>
     -   blabla
 
 ## Methodology of our Research
-
-We decided to
 
 # Twitter Analysis
 
@@ -1529,7 +1527,7 @@ mtext("Betweenness")
 
 ```
 
-```{r}
+```{r Network for Apple, echo=TRUE, message=FALSE, warning=FALSE}
 # now we find the centrality measures of the network
 # degree:the number of its adjacent edges (measure of direct influence)
 deg_a <- degree(bigrams.network_a, mode = "all")
