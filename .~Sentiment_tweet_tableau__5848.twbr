@@ -1,0 +1,338 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<!-- build 20213.22.0325.1212                               -->
+<workbook source-build='2021.3.9 (20213.22.0325.1212)' source-platform='mac' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <document-format-change-manifest>
+    <_.fcp.AnimationOnByDefault.true...AnimationOnByDefault />
+    <IntuitiveSorting />
+    <IntuitiveSorting_SP2 />
+    <_.fcp.MarkAnimation.true...MarkAnimation />
+    <_.fcp.ObjectModelEncapsulateLegacy.true...ObjectModelEncapsulateLegacy />
+    <_.fcp.ObjectModelTableType.true...ObjectModelTableType />
+    <_.fcp.SchemaViewerObjectModel.true...SchemaViewerObjectModel />
+    <SheetIdentifierTracking />
+    <WindowsPersistSimpleIdentifiers />
+  </document-format-change-manifest>
+  <preferences>
+    <preference name='ui.encoding.shelf.height' value='24' />
+    <preference name='ui.shelf.height' value='26' />
+  </preferences>
+  <_.fcp.AnimationOnByDefault.false...style>
+    <_.fcp.AnimationOnByDefault.false..._.fcp.MarkAnimation.true...style-rule element='animation'>
+      <_.fcp.AnimationOnByDefault.false...format attr='animation-on' value='ao-on' />
+    </_.fcp.AnimationOnByDefault.false..._.fcp.MarkAnimation.true...style-rule>
+  </_.fcp.AnimationOnByDefault.false...style>
+  <datasources>
+    <datasource caption='Apple_sentdf (Apple_sentdf)' inline='true' name='federated.053lef11htwgpu1egnhlx01rmpng' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='Apple_sentdf' name='excel-direct.0g21l8o0e1m25410tgyeg1436nsd'>
+            <connection class='excel-direct' cleaning='no' compat='no' dataRefreshTime='' filename='/Users/Lily/Library/Mobile Documents/com~apple~CloudDocs/Trinity College Dublin/BU7147 Social Media Analysis/Group Assignment/Social-Media-Analytics/Senti_tweet_Tableau.xls' interpretationMode='0' password='' server='' validate='no' />
+          </named-connection>
+        </named-connections>
+        <_.fcp.ObjectModelEncapsulateLegacy.false...relation connection='excel-direct.0g21l8o0e1m25410tgyeg1436nsd' name='Apple_sentdf' table='[Apple_sentdf$]' type='table'>
+          <columns gridOrigin='A1:D11:no:A1:D11:0' header='yes' outcome='6'>
+            <column datatype='integer' name='F1' ordinal='0' />
+            <column datatype='string' name='sentiment' ordinal='1' />
+            <column datatype='integer' name='Apple' ordinal='2' />
+            <column datatype='integer' name='Samsung' ordinal='3' />
+          </columns>
+        </_.fcp.ObjectModelEncapsulateLegacy.false...relation>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...relation connection='excel-direct.0g21l8o0e1m25410tgyeg1436nsd' name='Apple_sentdf' table='[Apple_sentdf$]' type='table'>
+          <columns gridOrigin='A1:D11:no:A1:D11:0' header='yes' outcome='6'>
+            <column datatype='integer' name='F1' ordinal='0' />
+            <column datatype='string' name='sentiment' ordinal='1' />
+            <column datatype='integer' name='Apple' ordinal='2' />
+            <column datatype='integer' name='Samsung' ordinal='3' />
+          </columns>
+        </_.fcp.ObjectModelEncapsulateLegacy.true...relation>
+        <metadata-records>
+          <metadata-record class='capability'>
+            <remote-name />
+            <remote-type>0</remote-type>
+            <parent-name>[Apple_sentdf]</parent-name>
+            <remote-alias />
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype='integer' name='context'>0</attribute>
+              <attribute datatype='string' name='gridOrigin'>&quot;A1:D11:no:A1:D11:0&quot;</attribute>
+              <attribute datatype='boolean' name='header'>true</attribute>
+              <attribute datatype='integer' name='outcome'>6</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>F1</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[F1]</local-name>
+            <parent-name>[Apple_sentdf]</parent-name>
+            <remote-alias>F1</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype='string' name='DebugRemoteType'>&quot;I8&quot;</attribute>
+            </attributes>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Apple!sentdf_F815D1DAA7124DD8936BAE753F4BE6B4]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>sentiment</remote-name>
+            <remote-type>130</remote-type>
+            <local-name>[sentiment]</local-name>
+            <parent-name>[Apple_sentdf]</parent-name>
+            <remote-alias>sentiment</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <collation flag='1' name='LEN_RUS_S2' />
+            <attributes>
+              <attribute datatype='string' name='DebugRemoteType'>&quot;WSTR&quot;</attribute>
+            </attributes>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Apple!sentdf_F815D1DAA7124DD8936BAE753F4BE6B4]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Apple</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[Apple]</local-name>
+            <parent-name>[Apple_sentdf]</parent-name>
+            <remote-alias>Apple</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype='string' name='DebugRemoteType'>&quot;I8&quot;</attribute>
+            </attributes>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Apple!sentdf_F815D1DAA7124DD8936BAE753F4BE6B4]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Samsung</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[Samsung]</local-name>
+            <parent-name>[Apple_sentdf]</parent-name>
+            <remote-alias>Samsung</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype='string' name='DebugRemoteType'>&quot;I8&quot;</attribute>
+            </attributes>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Apple!sentdf_F815D1DAA7124DD8936BAE753F4BE6B4]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled='yes' />
+      <_.fcp.ObjectModelTableType.true...column caption='Apple_sentdf' datatype='table' name='[__tableau_internal_object_id__].[Apple!sentdf_F815D1DAA7124DD8936BAE753F4BE6B4]' role='measure' type='quantitative' />
+      <column caption='Sentiment' datatype='string' name='[sentiment]' role='dimension' type='nominal' />
+      <layout _.fcp.SchemaViewerObjectModel.false...dim-percentage='0.5' _.fcp.SchemaViewerObjectModel.false...measure-percentage='0.4' dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      <semantic-values>
+        <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
+      </semantic-values>
+      <_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+        <objects>
+          <object caption='Apple_sentdf' id='Apple!sentdf_F815D1DAA7124DD8936BAE753F4BE6B4'>
+            <properties context=''>
+              <relation connection='excel-direct.0g21l8o0e1m25410tgyeg1436nsd' name='Apple_sentdf' table='[Apple_sentdf$]' type='table'>
+                <columns gridOrigin='A1:D11:no:A1:D11:0' header='yes' outcome='6'>
+                  <column datatype='integer' name='F1' ordinal='0' />
+                  <column datatype='string' name='sentiment' ordinal='1' />
+                  <column datatype='integer' name='Apple' ordinal='2' />
+                  <column datatype='integer' name='Samsung' ordinal='3' />
+                </columns>
+              </relation>
+            </properties>
+          </object>
+        </objects>
+      </_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name='Sheet 1'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Apple_sentdf (Apple_sentdf)' name='federated.053lef11htwgpu1egnhlx01rmpng' />
+          </datasources>
+          <datasource-dependencies datasource='federated.053lef11htwgpu1egnhlx01rmpng'>
+            <column datatype='integer' name='[Apple]' role='measure' type='quantitative' />
+            <column datatype='integer' name='[Samsung]' role='measure' type='quantitative' />
+            <column-instance column='[sentiment]' derivation='None' name='[none:sentiment:nk]' pivot='key' type='nominal' />
+            <column caption='Sentiment' datatype='string' name='[sentiment]' role='dimension' type='nominal' />
+            <column-instance column='[Apple]' derivation='Sum' name='[sum:Apple:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[Samsung]' derivation='Sum' name='[sum:Samsung:qk]' pivot='key' type='quantitative' />
+          </datasource-dependencies>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <color column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+              <text column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='true' />
+              </style-rule>
+            </style>
+          </pane>
+          <pane id='1' selection-relaxation-option='selection-relaxation-allow' y-axis-name='[federated.053lef11htwgpu1egnhlx01rmpng].[sum:Apple:qk]'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <color column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+              <text column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='true' />
+              </style-rule>
+            </style>
+          </pane>
+          <pane id='2' selection-relaxation-option='selection-relaxation-allow' y-axis-name='[federated.053lef11htwgpu1egnhlx01rmpng].[sum:Samsung:qk]'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <color column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+              <text column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='true' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>([federated.053lef11htwgpu1egnhlx01rmpng].[sum:Apple:qk] + [federated.053lef11htwgpu1egnhlx01rmpng].[sum:Samsung:qk])</rows>
+        <cols>[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]</cols>
+      </table>
+      <simple-id uuid='{1079DA68-33E8-4617-926F-F92B39295868}' />
+    </worksheet>
+    <worksheet name='Sheet 2'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Apple_sentdf (Apple_sentdf)' name='federated.053lef11htwgpu1egnhlx01rmpng' />
+          </datasources>
+          <datasource-dependencies datasource='federated.053lef11htwgpu1egnhlx01rmpng'>
+            <column datatype='integer' name='[Apple]' role='measure' type='quantitative' />
+            <column datatype='integer' name='[Samsung]' role='measure' type='quantitative' />
+            <column-instance column='[sentiment]' derivation='None' name='[none:sentiment:nk]' pivot='key' type='nominal' />
+            <column caption='Sentiment' datatype='string' name='[sentiment]' role='dimension' type='nominal' />
+            <column-instance column='[Apple]' derivation='Sum' name='[sum:Apple:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[Samsung]' derivation='Sum' name='[sum:Samsung:qk]' pivot='key' type='quantitative' />
+          </datasource-dependencies>
+          <shelf-sorts>
+            <shelf-sort-v2 dimension-to-sort='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' direction='DESC' is-on-innermost-dimension='true' measure-to-sort-by='[federated.053lef11htwgpu1egnhlx01rmpng].[sum:Samsung:qk]' shelf='columns' />
+          </shelf-sorts>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <color column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+            </encodings>
+          </pane>
+          <pane id='1' selection-relaxation-option='selection-relaxation-allow' y-axis-name='[federated.053lef11htwgpu1egnhlx01rmpng].[sum:Samsung:qk]'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <color column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+            </encodings>
+          </pane>
+          <pane id='2' selection-relaxation-option='selection-relaxation-allow' y-axis-name='[federated.053lef11htwgpu1egnhlx01rmpng].[sum:Apple:qk]'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <color column='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' />
+            </encodings>
+          </pane>
+        </panes>
+        <rows>([federated.053lef11htwgpu1egnhlx01rmpng].[sum:Samsung:qk] + [federated.053lef11htwgpu1egnhlx01rmpng].[sum:Apple:qk])</rows>
+        <cols>[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]</cols>
+      </table>
+      <simple-id uuid='{0B9AFC17-9F7A-4836-920C-E3D865D4C030}' />
+    </worksheet>
+  </worksheets>
+  <windows source-height='30'>
+    <window class='worksheet' maximized='true' name='Sheet 1'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+        <edge name='right'>
+          <strip size='160'>
+            <card pane-specification-id='1' param='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' type='color' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{87D44F0A-6377-4B77-BCEE-215E252B5C8C}' />
+    </window>
+    <window class='worksheet' name='Sheet 2'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+        <edge name='right'>
+          <strip size='160'>
+            <card pane-specification-id='1' param='[federated.053lef11htwgpu1egnhlx01rmpng].[none:sentiment:nk]' type='color' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{8C559A8B-BB78-421F-83AE-B58FB862D6CD}' />
+    </window>
+  </windows>
+</workbook>
