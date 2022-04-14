@@ -961,7 +961,7 @@ a_doc.lengths <- rowSums(as.matrix(DocumentTermMatrix(a_corpus)))
 a_dtm <- DocumentTermMatrix(a_corpus)
 
 # Now for some topics
-SEED = sample(1:1000000, 1)  # Pick a random seed for replication
+SEED = sample(1:1000000, 1) 
 k = 5 
 
 # This might take a minute!
