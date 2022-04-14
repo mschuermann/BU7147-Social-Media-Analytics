@@ -17,19 +17,47 @@ Source: [IDC. (2022). Global smartphone market share from 4th quarter 2009 to 4
 
 ## Samsung Galaxy S22
 
+The Samsung Galaxy S series is the high-end model produced and sold by Samsung, a South Korean multinational electronics company. The S series has 13 generations. Together with the Galaxy Z and Galaxy Note (discontinued) series, the S series serves as flagship models ([Wikipedia, n.d.)](https://en.wikipedia.org/wiki/Samsung_Galaxy_S_series "Wikipedia Samsung Galaxy S series"). Samsung S series uses the open source operating system Android ([Samsung](https://www.samsung.com/ie/smartphones/galaxy-s22-ultra/)).
+
+In February 2022 the model S22 was released in three variants: S22, S22 Plus (also: S22+) and S22 Ultra ([Wikipedia, n.d.)](https://en.wikipedia.org/wiki/Samsung_Galaxy_S_series "Wikipedia Samsung Galaxy S series"). It comes in the colours that are shown in the picture below, namely: phantom white, burgundy, phantom black and green ([Samsung](https://www.samsung.com/ie/smartphones/galaxy-s22-ultra/)). Also the S22 Ultra variant comes with an so-called "S Pen" which lets the user write on their phone and can be recharged within the phone ([Samsung](https://www.samsung.com/ie/smartphones/galaxy-s22-ultra/)).
+
+Samsung advertises the S22 series with the following features:
+
+-   "The phone that makes everyday epic
+
+-   Nightography camera
+
+-   A battery that lasts the day and beyond
+
+-   Our fastest chip ever"
+
+(Source: [Samsung](https://www.samsung.com/ie/smartphones/galaxy-s22/))
+
 [![](https://img.global.news.samsung.com/global/wp-content/uploads/2022/02/Galaxy-S22-S22-pr_main1.jpg "Samsung S22"){width="707"}](https://img.global.news.samsung.com/global/wp-content/uploads/2022/02/Galaxy-S22-S22-pr_main1.jpg)
 
 [Picture Source](https://img.global.news.samsung.com/global/wp-content/uploads/2022/02/Galaxy-S22-S22-pr_main1.jpg)
 
 ## Apple iPhone 13
 
-c
+The Apple iPhone series is the only smartphone series produced and sold by Apple Inc, an US-American multinational technology company ([Wikipedia](https://en.wikipedia.org/wiki/IPhone)).
+
+The generation 13 was released in September 2021 in three variants: iPhone 13, iPhone 13 mini, iPhone 13 Pro, iPhone 13 Pro Max and iPhone SE. The regular variant and mini can be bought in the colours: green, pink, blue, midnight, starlight, red. The variants Pro and Pro Max are available in: alpine green, silver, gold, graphite, sierra blue. The iPhone SE is available in: midnight, starlight, red ([Apple](https://www.apple.com/iphone/)).
+
+Apple advertises the iPhone Pro with the following features:
+
+-   "A dramatically more powerful camera system.
+
+-   A display so responsive, every interaction feels new again.
+
+-   The world's fastest smartphone chip.
+
+-   Exceptional durability.
+
+-   And a huge leap in battery life." ([Samsung](https://www.apple.com/iphone-13-pro/))
 
 [![](https://www.apple.com/newsroom/images/product/iphone/standard/Apple-iPhone13-Pro-color-lineup-220308_big_carousel.jpg.small_2x.jpg "Apple iPhone 13"){width="714"}](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV7Zc7XpTER8ja_PrtuIxqsapjs01ElsuqKQ&usqp=CAU)
 
 [Picture Source](https://www.apple.com/newsroom/images/product/iphone/standard/Apple-iPhone13-Pro-color-lineup-220308_big_carousel.jpg.slideshow-xlarge.jpg)
-
-c
 
 ## Comparison of Features
 
@@ -69,17 +97,15 @@ Source: <https://www.tomsguide.com/face-off/samsung-galaxy-s22-vs-iphone-13>
 
 ## Objectives of our Research
 
--   Brand Perception is the result of experiences from a customer with the business
+-   Suggestions to customers about the products based on other customers' opinions
 
-    -   
+-   Effective decision making opinion to the customer
 
--   Product Analysis
+-   Feedback provided to the companies to improve their product and business
 
     -   What features did customers liked most?
 
     -   What are features that can be improved?
-
-    -   blabla
 
 ## Methodology of our Research
 
