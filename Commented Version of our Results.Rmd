@@ -7,13 +7,27 @@ output:
 
 # Analysis of Samsung S22 and Apple iPhone 13
 
-## Presentation of the Products
+## The Smartphone Market
+
+The global smartphone market has experienced multiple market leaders over the past few years. The only two major brands that remained over the years were Apple and Samsung. Those two brands are compared regularly and are competing over the market share. While Samsung was the market leader in the first three quarters in 2021. In September 2021, Apple released its new iPhone model with the generation 13 and gained market share, taking over the market leader position. In February 2022, Samsung also released the new model in its Galaxy series. Those two phones are the flagships in the current smartphone market.
 
 ![](images/paste-3C658D06.png)
 
+Source: [IDC. (2022). Global smartphone market share from 4th quarter 2009 to 4th quarter 2021 (by vendor). Statista. Statista Inc..](https://www.statista.com/statistics/271496/global-market-share-held-by-smartphone-vendors-since-4th-quarter-2009/) Accessed: April 14, 2022.
+
+## Samsung Galaxy S22
+
 [![](https://img.global.news.samsung.com/global/wp-content/uploads/2022/02/Galaxy-S22-S22-pr_main1.jpg "Samsung S22"){width="707"}](https://img.global.news.samsung.com/global/wp-content/uploads/2022/02/Galaxy-S22-S22-pr_main1.jpg)
 
+## Apple iPhone 13
+
+c
+
 [![](https://www.apple.com/newsroom/images/product/iphone/standard/Apple-iPhone13-Pro-color-lineup-220308_big_carousel.jpg.small_2x.jpg "Apple iPhone 13"){width="714"}](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV7Zc7XpTER8ja_PrtuIxqsapjs01ElsuqKQ&usqp=CAU)
+
+c
+
+## Comparison of Features
 
 +-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 |                             | Samsung S22                                                                            | Apple iPhone 13                           |
@@ -49,7 +63,13 @@ output:
 
 Source: <https://www.tomsguide.com/face-off/samsung-galaxy-s22-vs-iphone-13>
 
-## Twitter Analysis
+## Objective of our Research
+
+We
+
+## Methodology of our Research 
+
+# Twitter Analysis
 
 ```{r Initialising Packages, include=FALSE}
 library(base64enc)
@@ -927,5 +947,622 @@ lapply(a_models, terms, 10)
 a_assignments <- sapply(a_models, topics) 
 
 a_assignments
+
+```
+
+# Amazon Review Analysis
+
+```{r Initialising Packages Amazon, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(twitteR)
+library(ROAuth)
+library(hms)
+library(lubridate) 
+library(tidytext)
+library(NLP)
+library(tm)
+library(RColorBrewer)
+library(wordcloud)
+library(igraph)
+library(glue)
+library(scales)
+library(networkD3)
+library(rtweet)
+library(plyr)
+library(stringr)
+library(ggplot2)
+library(ggeasy)
+library(plotly)
+library(dplyr)  
+library(hms)
+library(lubridate) 
+library(magrittr)
+library(tidyverse)
+library(widyr)
+library(tidyr)
+library(tidytext)
+library(base64enc)
+```
+
+## Data Input
+
+```{r Read file Samsung, message=FALSE, warning=FALSE, include=FALSE}
+samsung.reviews <- read.csv("Samsung_Amz.csv")
+iphone.reviews <- read.csv("iPhone_Amz.csv")
+```
+
+```{r Information about the data, echo=FALSE}
+dim(samsung.reviews) #dimension of the data
+summary(samsung.reviews)
+dim(iphone.reviews)
+summary(iphone.reviews)
+```
+
+## Data Preprocessing
+
+```{r Preprocessing Amazon data, message=FALSE, warning=FALSE, include=FALSE}
+# Load "Stop Words" from the tidytext package
+data("stop_words")
+
+# Removing Stop Words in both data frames
+samsung.reviews.text <- samsung.reviews %>%
+  select(review_text)
+
+iphone.reviews.text <- iphone.reviews %>%
+  select(review_text)
+
+library(stringi)
+stri_enc_mark(samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- sapply(samsung.reviews.text$review_text,
+                                                   function(row) iconv(row,
+                                                                       "latin1",
+                                                                       "ASCII",
+                                                                       sub = " "))
+
+# Lowecase all text
+samsung.reviews.text$review_text <- tolower(samsung.reviews.text$review_text)
+
+# make wasn't=was not, can't=can not, etc..
+samsung.reviews.text$review_text <- gsub("wasn[\u2019']t", "was not", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("won[\u2019']t", "will not", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("can[\u2019']t", "can not", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("didn[\u2019']t", "did not", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("don[\u2019']t", "do not", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("I[\u2019']m", "I am", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("[\u2019']ve", " have", samsung.reviews.text$review_text) 
+samsung.reviews.text$review_text <- gsub("[\u2019|']s", "", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("[\u2019']re", " are", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("[\u2019']ll", " will", samsung.reviews.text$review_text)
+
+
+# If you view common typos during your analysis, fix them here.
+samsung.reviews.text$review_text<- gsub("canceling", "cancelling", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("cancellation", "cancelling", samsung.reviews.text$review_text)
+samsung.reviews.text$review_text <- gsub("issues", "issue", samsung.reviews.text$review_text)
+
+# omit the following two lines if you have not loaded the tm package
+# Remove numbers in the text
+#bose.headphones.reviews.text$review_text <- removeNumbers(bose.headphones.reviews.text$review_text)
+
+# Remove punctuations in the text
+samsung.reviews.text$review_text <- removePunctuation(samsung.reviews.text$review_text)
+
+# Fix Negations
+# Create a list to identify the sentiment shifters in the text
+negation.words <- c("not",
+                    "no",
+                    "without",
+                    "never",
+                    "bad",
+                    "none",
+                    "never",
+                    "nobody",
+                    "nowhere",
+                    "neither",
+                    "nothing"
+)
+
+stri_enc_mark(iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- sapply(iphone.reviews.text$review_text,
+                                                  function(row) iconv(row,
+                                                                      "latin1",
+                                                                      "ASCII",
+                                                                      sub = " "))
+
+# Lowecase all text
+iphone.reviews.text$review_text <- tolower(iphone.reviews.text$review_text)
+
+# make wasn't=was not, can't=can not, etc..
+iphone.reviews.text$review_text <- gsub("wasn[\u2019']t", "was not", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("won[\u2019']t", "will not", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("can[\u2019']t", "can not", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("didn[\u2019']t", "did not", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("don[\u2019']t", "do not", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("I[\u2019']m", "I am", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("[\u2019']ve", " have", iphone.reviews.text$review_text) 
+iphone.reviews.text$review_text <- gsub("[\u2019|']s", "", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("[\u2019']re", " are", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("[\u2019']ll", " will", iphone.reviews.text$review_text)
+
+
+# If you view common typos during your analysis, fix them here.
+iphone.reviews.text$review_text<- gsub("canceling", "cancelling", iphone.reviews.text$review_text)
+iphone.reviews.text$review_text <- gsub("cancellation", "cancelling", iphone.reviews.text$review_text)
+
+# Remove punctuations in the text
+iphone.reviews.text$review_text <- removePunctuation(iphone.reviews.text$review_text)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+shifted.words <- samsung.reviews.text %>%
+  unnest_tokens(bigram, review_text, token = "ngrams", n = 2)%>%
+  dplyr::count(bigram, sort = TRUE) %>%
+  separate(bigram, c("word1", "word2"), sep = " ")%>%
+  filter(word1 %in% negation.words & !word2 %in% stop_words$word)%>%
+  inner_join(get_sentiments("bing"), by = c(word2 = "word"))%>%
+  mutate(sentiment = ifelse(sentiment == "positive", 1, -1)) %>%
+  mutate(score = sentiment * n) %>%
+  mutate(word2 = reorder(word2, score))
+
+shifted.words
+
+# Pick the most effective sentiment shifters
+negated.phrases <- c("not worth", 
+                     "not noise",
+                     "no issues",
+                     "no complaints",
+                     "not disappoint",
+                     "not disappointed",
+                     "not cheap",
+                     "no regrets"
+                     
+)
+
+# Find synonyms for the phrases above to replace
+synonyms <- c("expensive",
+              "functional",
+              "cool",
+              "satisfied",
+              "satisfied",
+              "satisfied",
+              "expensive",
+              "satisfied"
+)
+library(textclean)
+# Replace the negations with their synonyms.
+samsung.reviews.text <- mgsub(samsung.reviews.text$review_text, negated.phrases, synonyms) %>%
+  dplyr::as_data_frame() %>%
+  rename(review_text = value)
+
+samsung.reviews.text
+
+```
+
+```{r}
+shifted.words <- iphone.reviews.text %>%
+  unnest_tokens(bigram, review_text, token = "ngrams", n = 2)%>%
+  dplyr::count(bigram, sort = TRUE) %>%
+  separate(bigram, c("word1", "word2"), sep = " ")%>%
+  filter(word1 %in% negation.words & !word2 %in% stop_words$word)%>%
+  inner_join(get_sentiments("bing"), by = c(word2 = "word"))%>%
+  mutate(sentiment = ifelse(sentiment == "positive", 1, -1)) %>%
+  mutate(score = sentiment * n) %>%
+  mutate(word2 = reorder(word2, score))
+
+shifted.words
+
+iphone.reviews.text <- mgsub(iphone.reviews.text$review_text, negated.phrases, synonyms) %>%
+  dplyr::as_data_frame() %>%
+  rename(review_text = value)
+
+iphone.reviews.text
+```
+
+## Wordcloud
+
+```{r Samsung Wordcloud Amazon, echo=FALSE, message=FALSE, warning=FALSE}
+# if you want to ignore words that are frequent but doesn't help, add them to this list. ###Ignore the words
+ignore.words <- data_frame(word = c( "samsung","phone"))
+
+# create the words freq table
+word.freq.table_s <- samsung.reviews.text %>% 
+  unnest_tokens(word, review_text) %>%
+  anti_join(stop_words) %>%
+  anti_join(ignore.words) %>%
+  dplyr::count(word, sort = TRUE)
+word.freq.table_s
+
+# Plotting a Wordcloud
+word.freq.table_s %>% 
+  filter(n>8) %>%
+  with(wordcloud(word, n,
+                 scale = c(5,0.3),
+                 colors = brewer.pal(8, "Dark2")))
+
+```
+
+```{r Wordcloud Apple Amazon, echo=FALSE, message=FALSE, warning=FALSE}
+# if you want to ignore words that are frequent but doesn't help, add them to this list. ###Ignore the words
+ignore.words <- data_frame(word = c("iphone", "phone","apple", "13"))
+
+# create the words freq table
+word.freq.table_a<- iphone.reviews.text %>% 
+  unnest_tokens(word, review_text) %>%
+  anti_join(stop_words) %>%
+  anti_join(ignore.words) %>%
+  dplyr::count(word, sort = TRUE)
+word.freq.table_a
+
+# Plotting a Wordcloud
+word.freq.table_a %>% 
+  filter(n>8) %>%
+  with(wordcloud(word, n,
+                 scale = c(5,0.3),
+                 colors = brewer.pal(8, "Dark2")))
+
+```
+
+## Sentiment Analysis
+
+```{r Positive and negative words Amazon Samsung, echo=FALSE, message=FALSE, warning=FALSE}
+# Most common Positive and Negative words using Bing
+samsung.reviews.text %>% 
+  unnest_tokens(word, review_text) %>%
+  anti_join(stop_words) %>%
+  anti_join(ignore.words) %>%
+  inner_join(get_sentiments("bing")) %>%
+  dplyr::count(word, sentiment, sort = TRUE) %>%
+  filter(n > 2) %>%
+  mutate(word = reorder(word, n)) %>%
+  mutate(percent = round(n/sum(n), 3)) %>%
+  ggplot(aes(x = word, y = percent, fill = sentiment, label = percent)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  geom_text(aes(y = 0.7*percent)) +
+  labs(title = "Samsung Polarity (bing)") +
+  coord_flip() + 
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+```{r Positive and negative words Amazon Apple, echo=FALSE, message=FALSE, warning=FALSE}
+# Most common Positive and Negative words using Bing
+iphone.reviews.text %>% 
+  unnest_tokens(word, review_text) %>%
+  anti_join(stop_words) %>%
+  anti_join(ignore.words) %>%
+  inner_join(get_sentiments("bing")) %>%
+  dplyr::count(word, sentiment, sort = TRUE) %>%
+  filter(n > 2) %>%
+  mutate(word = reorder(word, n)) %>%
+  mutate(percent = round(n/sum(n), 3)) %>%
+  ggplot(aes(x = word, y = percent, fill = sentiment, label = percent)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  geom_text(aes(y = 0.7*percent)) +
+  labs(title = "iPhone 13 Word Polarity (bing)") +
+  coord_flip() + 
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+```{r message=FALSE, warning=FALSE}
+# Bing Samsung
+bing.mean.score_s <- word.freq.table_s %>% 
+  inner_join(get_sentiments("bing")) %>%
+  mutate(sentiment = ifelse(sentiment == "positive", 1, -1)) %>%
+  summarise(Samsung_mean = mean(sentiment))
+
+bing.mean.score_a <- word.freq.table_a %>% 
+  inner_join(get_sentiments("bing")) %>%
+  mutate(sentiment = ifelse(sentiment == "positive", 1, -1)) %>%
+  summarise(Apple_mean = mean(sentiment))
+
+data.frame(bing.mean.score_s, bing.mean.score_a)
+
+```
+
+```{r}
+#Samsung
+# rescale the range to 5 star range.
+bing.mean.score_s<-rescale(bing.mean.score_s$mean, to = c(1,5), from = c(-1,1))
+
+# Afinn scores are from -5 to 5.
+afinn.mean.score_s <- word.freq.table_s %>% 
+  inner_join(get_sentiments("afinn"))%>%
+  summarise(Samsung_mean = mean(value))
+
+# rescale the range to 5 star range.
+afinn.mean.score_s<-rescale(afinn.mean.score_s$Samsung_mean, to = c(1,5), from = c(-5,5))
+
+#Apple
+# rescale the range to 5 star range.
+bing.mean.score_a<-rescale(bing.mean.score_a$mean, to = c(1,5), from = c(-1,1))
+
+# Afinn scores are from -5 to 5.
+afinn.mean.score_a <- word.freq.table_a %>% 
+  inner_join(get_sentiments("afinn"))%>%
+  summarise(Apple_mean = mean(value))
+
+# rescale the range to 5 star range.
+afinn.mean.score_a<-rescale(afinn.mean.score_a$Apple_mean, to = c(1,5), from = c(-5,5))
+afinn.mean.score_a
+
+data.table(afinn.mean.score_s, afinn.mean.score_a)
+```
+
+## Word Correlation
+
+```{r}
+# Correlation Terms
+# The correlation of appearing together in a review
+samsung.correlation.terms <- samsung.reviews.text %>%
+  mutate(review = row_number()) %>%
+  unnest_tokens(word, review_text) %>%
+  filter(!word %in% stop_words$word) %>%
+  group_by(word) %>%
+  filter(n() >=7)%>%
+  pairwise_cor(word, review, sort = TRUE)
+samsung.correlation.terms
+
+library(ggraph)
+library(igraph)
+samsung.correlation.terms %>%
+  filter(correlation >= 0.50) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "igraph", algorithm = "kk") +
+  geom_edge_link(aes(alpha = correlation), 
+                 show.legend = FALSE)+
+  geom_node_point(color = "lightblue", size = 2) +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+```
+
+```{r}
+# Correlation Terms
+# The correlation of appearing together in a review
+apple.correlation.terms <- iphone.reviews.text %>%
+  mutate(review = row_number()) %>%
+  unnest_tokens(word, review_text) %>%
+  filter(!word %in% stop_words$word) %>%
+  group_by(word) %>%
+  filter(n() >= 5)%>%
+  pairwise_cor(word, review, sort = TRUE)
+apple.correlation.terms
+
+library(ggraph)
+library(igraph)
+apple.correlation.terms %>%
+  filter(correlation >= 0.50) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "igraph", algorithm = "kk") +
+  geom_edge_link(aes(alpha = correlation), 
+                 show.legend = FALSE)+
+  geom_node_point(color = "lightblue", size = 2) +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+
+```
+
+```{r}
+bigrams.network.df_s <- samsung.reviews.text %>%
+  unnest_tokens(bigram, review_text, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word) %>%
+  dplyr::count(word1, word2, sort = TRUE) %>%
+  filter(n > 5)
+
+bigrams.network_s <- graph_from_data_frame(bigrams.network.df_s)
+bigrams.network_s
+
+bigrams.network.df_a <-iphone.reviews.text %>%
+  unnest_tokens(bigram, review_text, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word) %>%
+  dplyr::count(word1, word2, sort = TRUE) %>%
+  filter(n > 2)
+
+bigrams.network_a <- graph_from_data_frame(bigrams.network.df_a)
+bigrams.network_a
+```
+
+```{r}
+# now we find the centrality measures of the network
+# degree:the number of its adjacent edges (measure of direct influence)
+deg_s <- degree(bigrams.network_s, mode = "all")
+
+#K-core decomposition allows us to identify the core and the periphery of the network. A k-core is a maximal subnet of a network such that all nodes have at least degree K.
+core_s <- coreness(bigrams.network_s, mode = "all")
+
+# betweenness measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between nodes that pass through a particular node.
+betw_s <- betweenness(bigrams.network_s)
+
+#Eigenvector centrality is a measure of being well-connected connected to the well-connected. First eigenvector of the graph adjacency matrix. Only works with undirected networks.
+eigen_s <- eigen_centrality(bigrams.network_s, directed = TRUE)
+members_s <- cluster_walktrap(bigrams.network_s)
+
+library(igraph)
+bigrams.network_s <- simplify(bigrams.network_s
+                            #remove.multiple = FALSE, #error occured ?
+                            #remove.loops = TRUE)
+)
+V(bigrams.network_s)$color <- members$membership+1
+
+```
+
+```{r}
+# now we find the centrality measures of the network
+# degree:the number of its adjacent edges (measure of direct influence)
+deg_s <- degree(bigrams.network_s, mode = "all")
+
+#K-core decomposition allows us to identify the core and the periphery of the network. A k-core is a maximal subnet of a network such that all nodes have at least degree K.
+core_s <- coreness(bigrams.network_s, mode = "all")
+
+# betweenness measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between nodes that pass through a particular node.
+betw_s <- betweenness(bigrams.network_s)
+
+#Eigenvector centrality is a measure of being well-connected connected to the well-connected. First eigenvector of the graph adjacency matrix. Only works with undirected networks.
+eigen_s <- eigen_centrality(bigrams.network_s, directed = TRUE)
+members_s <- cluster_walktrap(bigrams.network_s)
+
+library(igraph)
+bigrams.network_s <- simplify(bigrams.network_s
+                            #remove.multiple = FALSE, #error occured ?
+                            #remove.loops = TRUE)
+)
+V(bigrams.network_s)$color <- members_s$membership+1
+
+# Using "Coreness" as size
+# Coreness -> mean (average distance to all the other nodes, diffusion of information)
+plot(bigrams.network_s,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.9,
+     vertex.label.dist = 0,
+     vertex.frame.color = 0,
+     vertex.size = core_s*10, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "gray",
+     main = "Bigram Communities (Samsung)"
+)
+mtext("Coreness")
+
+# Using "Degree" as size
+# degree=mode (number of edges of the node, in-degree:prestige
+
+plot(bigrams.network_s,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.9,
+     vertex.label.dist = 0,
+     vertex.frame.color = 0,
+     vertex.size = deg_s, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "gray",
+     main = "Bigram Communities (Samsung)"
+)
+mtext("Degree")
+
+# Using "Eigenvector Centrality" as size
+# centrality (the most connected words)
+plot(bigrams.network_s,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 0,
+     vertex.size = eigen_s$vector*20, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "black",
+     main = "Bigram Communities (Samsung)"
+)
+mtext("Eigenvector Centrality")
+
+# Using "Betweenness" as size
+#Betweenness -> median (weighted # of paths going through the node)
+plot(bigrams.network_s,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 0,
+     vertex.size = betw_s, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "lightgrey",
+     main = "Bigram Communities (Samsung)"
+)
+mtext("Betweenness")
+
+```
+
+```{r}
+# now we find the centrality measures of the network
+# degree:the number of its adjacent edges (measure of direct influence)
+deg_a <- degree(bigrams.network_a, mode = "all")
+
+#K-core decomposition allows us to identify the core and the periphery of the network. A k-core is a maximal subnet of a network such that all nodes have at least degree K.
+core_a <- coreness(bigrams.network_a, mode = "all")
+
+# betweenness measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between nodes that pass through a particular node.
+betw_a <- betweenness(bigrams.network_a)
+
+#Eigenvector centrality is a measure of being well-connected connected to the well-connected. First eigenvector of the graph adjacency matrix. Only works with undirected networks.
+eigen_a <- eigen_centrality(bigrams.network_a, directed = TRUE)
+members_a <- cluster_walktrap(bigrams.network_a)
+
+library(igraph)
+bigrams.network_a <- simplify(bigrams.network_a
+                            #remove.multiple = FALSE, #error occured ?
+                            #remove.loops = TRUE)
+)
+V(bigrams.network_a)$color <- members_a$membership+1
+
+# Using "Coreness" as size
+# Coreness -> mean (average distance to all the other nodes, diffusion of information)
+plot(bigrams.network_a,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.9,
+     vertex.label.dist = 0,
+     vertex.frame.color = 0,
+     vertex.size = core_a*10, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "gray",
+     main = "Bigram Communities (iPhone 13)"
+)
+mtext("Coreness")
+
+# Using "Degree" as size
+# degree=mode (number of edges of the node, in-degree:prestige
+
+plot(bigrams.network_a,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.9,
+     vertex.label.dist = 0,
+     vertex.frame.color = 0,
+     vertex.size = deg_a, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "gray",
+     main = "Bigram Communities (iPhone 13)"
+)
+mtext("Degree")
+
+# Using "Eigenvector Centrality" as size
+# centrality (the most connected words)
+plot(bigrams.network_a,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 0,
+     vertex.size = eigen_a$vector*20, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "black",
+     main = "Bigram Communities (iPhone 13)"
+)
+mtext("Eigenvector Centrality")
+
+# Using "Betweenness" as size
+#Betweenness -> median (weighted # of paths going through the node)
+plot(bigrams.network_a,
+     layout = layout_with_fr,
+     vertex.label.color = "black",
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 0,
+     vertex.size = betw_a, 
+     edge.arrow.size = 0.01,
+     edge.curved = 0.7,
+     edge.color = "lightgrey",
+     main = "Bigram Communities (iPhone 13)"
+)
+mtext("Betweenness")
 
 ```
