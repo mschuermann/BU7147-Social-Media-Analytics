@@ -477,21 +477,21 @@ The specifications of the phone that users talked about were:
 
 -   case
 
--   green (could mean colors?)
+-   green
 
 For iPhone 13, we can notice that some adjectives and verbs were mentioned a lot:
 
--   available, buy
+available, buy, win, free, still, now, good, better, best, like, will, get, want, need, can
 
--   win, free
-
--   still, now
-
--   good, better, best, like
-
--   will, get, want, need, can
+We will identify topics further during our analysis using LDA Topic Modelling.
 
 ### Insights
+
+Both models are mentioned with their camera and pixel but only Samsung has the word "video" mentioned a lot. We identified in our pre-research about the phones that both companies advertise their smartphones based on the camera. None of both mentions about positive abilities in the video recording in their main advertisement.
+
+For Samsung S22 users it seems to be important that a new update has been released. A new Android OS update for the series S22 has been released in April 2022 and updated security measurements and brought new features.
+
+For Apple iPhone 13 it has been talked a lot about green. The generation 13 has been the first Flagship model to be produced in this colour, therefore it makes sense that people discuss about it.
 
 ## Sentiment Analysis
 
@@ -607,7 +607,7 @@ ggplot(relative_comp_sentiment, aes(x= Sentiment, y= score, fill=variable)) +
 
 On the first look, sentiments are similar for both smartphone models and are commented on with highly positive sentiments. This means that on both models, users are generally speaking positively about their smartphone.
 
-Samsung S22 has more trust and anticipation while iPhone 13 brings more joy to its users but also more sadness, surprise, fear and disgust. We can see from this that iPhone 13 users are in general more emotional - in a negative and positive direction - than Samsung S22 users.
+Samsung S22 has more trust and anticipation while iPhone 13 brings more joy to its users but also more sadness, surprise, fear and disgust.
 
 ```{r Apple Sentiment Statistics, message=FALSE, warning=FALSE}
 ###### Sentimentr score #######
@@ -646,7 +646,7 @@ round(sd(sentimentr_samsung$word_count),2)))
 
 Samsung S22 tweets were on average 10.4 words long while Apple iPhone 13 tweets had 9.9 words. The tweet with the maximum number of words was about iPhone 13 with 135 identified words. Samsung S22 with 34 words maximum words is quite shorter.
 
-The sentimentr package in R estimates the sentiment polarity by sentence. The average sentiment for iPhone 13 was higher distributed with a range from -1.6 to +1.9 with its average at 0.26 while Samsung had a sentiment polarity from -1.1 to +1.6 with its average at 0.15. The higher variance within the data is identical to our findings from the plot "Relative Sentiment Score based on Tweets about Apple and Samsung" earlier. We assume that people are emotionally more dependent on their iPhone 13 than Samsung S22.
+The sentimentr package in R estimates the sentiment polarity by sentence. The average sentiment for iPhone 13 was higher distributed with a range from -1.6 to +1.9 with its average at 0.26 while Samsung had a sentiment polarity from -1.1 to +1.6 with its average at 0.15. The higher variance within the data is identical to our findings from the plot "Relative Sentiment Score based on Tweets about Apple and Samsung" earlier. We can see from this that iPhone 13 users are in general more emotional - in a negative and positive direction - than Samsung S22 users. We assume that people are emotionally more dependent on their iPhone 13 than Samsung S22.
 
 To see the sentiments per tweet, generate this HTML files:
 
@@ -723,6 +723,8 @@ ggplot(s_bigram_with_neg_sentiment, aes(x=bigrams, y=-weightage))+
   ggtitle("Relative Importance of Negative Words")
 
 ```
+
+Scandal is related to the GOS app that slowed Samsung phones down on purpose to save battery life without notifying the user about it.
 
 #### Apple iPhone 13
 
