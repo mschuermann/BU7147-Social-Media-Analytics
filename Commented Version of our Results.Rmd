@@ -343,7 +343,7 @@ ggplot() +
 
 On 3 out of 9 days Samsung S22 had more tweets than iPhone 13. On the other days Apple exceeded the number of tweets extremely. Surprisingly, the number of tweets and users per day for the Samsung S22 remains constant while there are only a few tweets about the iPhone 13 in the first 3 days and a high volume of tweets from 3nd April until 7th April 2022. There was not only more tweets but also a larger group of users posting about iPhone 13. We could not identify a specific reason for this phenomenon because the last official Apple event was in March 2022 and not in the time period we tested.
 
-There is no similar indicator from [Google Trends](https://trends.google.com/trends/explore?date=2022-03-31%202022-04-08&q=iPhone%2013,Samsung%20S22,Apple,Samsung) or other sources. The search terms iPhone 13, Samsung S22, Apple and Samsung are relatively constant over time as you can see from the image below (Screenshot from Google Trends). It can be noted that Apple is more likely to be looked up than Samsung as well as the iPhone 13 is more popular on Google Search than Samsung S22. This gives us a first impression that the iPhone 13 model receives in general more attention.
+There is no similar indicator from [Google Trends](https://trends.google.com/trends/explore?date=2022-03-31%202022-04-08&q=iPhone%2013,Samsung%20S22,Apple,Samsung) or other sources. The search terms iPhone 13, Samsung S22, Apple and Samsung are relatively constant over time as you can see from the image below (Screenshot from Google Trends). It can be noted that Samsung is more likely to be looked up than Apple as well as the iPhone 13 is more popular on Google Search than Samsung S22. This gives us a first impression that the iPhone 13 model receives in general more attention.
 
 From a brand perspective, Samsung has more searches overall than Apple; and from their latest models, iPhones have more searches than Samsung mobile phones. This result may be because Samsung has a more diverse product range and series [Korea Expose](https://www.koreaexpose.com/samsung-products-basic-information/#:~:text=Samsung%20Electronics%2C%20the%20largest%20subsidiary,and%20security%2Fmonitoring%20systems%2C%20to) than Apple [Apple Wiki](https://apple.fandom.com/wiki/List_of_Apple_products), but within the flagship phones of their brands, iPhone is getting more attention than Samsung S22. Apple has more topicality in the online discussions which might due to their marketing strategy or people just like to give attention and being involved in the discussion of their new product releasing.
 
@@ -1600,7 +1600,7 @@ samsung.correlation.terms %>%
   ggtitle("Correlation of terms in Samsung S22 Reviews")
 ```
 
-Which words are correlating with each
+Which words are correlating with each other and what is it related to?
 
 -   **Snapdragon feature** means the [**Qualcomm Snapdragon 8 Gen 1**](https://www.androidauthority.com/qualcomm-snapdragon-8-gen-1-3063350/) is the processor that the S22 uses in the US models. Other countries in the world receive an Samsung S22 models which uses Samsung's own processor [**Qualcomm Snapdragon 8 Gen 1**](https://www.androidauthority.com/qualcomm-snapdragon-8-gen-1-3063350/).
 
@@ -1608,7 +1608,17 @@ Which words are correlating with each
 
 -   **Software issues app** could be related to the scandal of Game Optimising Service (GOS) app that slows down more than 10 thousand apps.
 
--   **Battery life of Samsung S22**
+-   **Battery life of Samsung S22** has different batteries in each model. The strongest one is built in the Samsung S22 Plus (15h 16min). The weakest one in the regular Samsung S22 (12h 23min). The S22 Ultra's battery (13h 17min) is actually not that long-lasting as it has been in the prior model Samsung S21 Ultra (14h 43min).
+
+-   **Feels premium** is referring to Samsung's advertisement that the Samsung S22 Ultra has the ["most premium look and feel"](https://news.samsung.com/global/samsung-galaxy-s22-ultra-offers-the-ultimate-and-most-premium-s-series-experience-yet). The word correlations of **quality**, **build** and **app** seems to refer to the same in different words.
+
+-   **Note Series** is the discontinued series of Samsung that has been merged into the S series, e.g. by integrating the pen feature.
+
+-   **Pre-purchase, pro** and **cons** is correlating with **GB** which could mean that people are comparing storage or RAM power before making a purchase decision of Samsung S22.
+
+-   **Protector** is correlating with the word **days**. We could not find any reason for that, neither from the original reviews. Probably because many people commented how many days they are already using the phone as a reference.
+
+-   **Apple**, **iPhone**, **max** and **pro** are correlated because it is different name parts of iPhone's model. A lot of people compare the flagship model to Samsung S22 (as we do here :-)). The **video** quality seems to be highly important for those comparisons as it correlates as well.
 
 ```{r}
 # Correlation Terms
