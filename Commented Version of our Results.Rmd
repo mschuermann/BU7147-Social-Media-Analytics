@@ -644,6 +644,9 @@ data.frame(" "= c("Average", "Variance", "Standard Deviation"),
 round(sd(sentimentr_apple$ave_sentiment),2)), 
 "Word Count"=c(round(mean(sentimentr_apple$word_count),2), round(var(sentimentr_apple$word_count),2),
 round(sd(sentimentr_apple$word_count),2)))
+
+#rescale to a scale of 1 to 5
+a_tweets_scale_5 <- mean(rescale(sentimentr_apple$ave_sentiment, to = c(1,5), from = c(-1,1)))
 ```
 
 ```{r Samsung Sentiment Statistics, message=FALSE, warning=FALSE}
@@ -662,6 +665,9 @@ data.frame(" "= c("Average", "Variance", "Standard Deviation"),
 round(sd(sentimentr_samsung$ave_sentiment),2)), 
 "Word Count"=c(round(mean(sentimentr_samsung$word_count),2), round(var(sentimentr_samsung$word_count),2),
 round(sd(sentimentr_samsung$word_count),2)))
+
+#rescale to a scale of 1 to 5
+s_tweets_scale_5 <- mean(rescale(sentimentr_samsung$ave_sentiment, to = c(1,5), from = c(-1,1)))
 ```
 
 Samsung S22 tweets were on average 10.4 words long while Apple iPhone 13 tweets had 9.9 words. The tweet with the maximum number of words was about iPhone 13 with 135 identified words. Samsung S22 with 34 words maximum words is quite shorter.
@@ -1559,7 +1565,11 @@ iphone.review.stars <- iphone.reviews$review_star %>%
   round(1)
 
 
-compare.stars <- data.table(" "= c("Average 5-Star-Score identified from Sentiments", "Average 5-Star-Score given by users") ,"S22"=c(round(afinn.mean.score_s, digits=1), samsung.review.stars), "iPhone 13" = c(round(afinn.mean.score_a, digits=1), iphone.review.stars))
+compare.stars <- data.table(
+  " "= c("Average 5-Star-Score identified from Sentiments", "Average 5-Star-Score given by users", "Average 5-Star-Score identified from Tweets"),
+  "S22"=c(round(afinn.mean.score_s, digits=1), samsung.review.stars, round(s_tweets_scale_5,1)), 
+  "iPhone 13" = c(round(afinn.mean.score_a, digits=1), iphone.review.stars, round(s_tweets_scale_5,1)))
+compare.stars
 ```
 
 ## Word Correlation
