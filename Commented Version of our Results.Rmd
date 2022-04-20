@@ -97,11 +97,25 @@ Source: <https://www.tomsguide.com/face-off/samsung-galaxy-s22-vs-iphone-13>
 
 ## Objectives of our Research
 
--   Identification of the strengths and weaknesses of the competitors which can help to identify a gap in a market and enhancing the own business strategy.
+-   Identification of the strengths and weaknesses of the competitor models which can help to identify a gap in a market and enhancing the own business strategy.
 
 -   Identification of suggestions to customers about the products based on other customers' opinions
 
 ## Methodology of our Research
+
+We used data from Twitter API and Amazon Reviews to get information towards our research objective.
+
+We used the following methods:
+
+-   Word Frequencies,
+
+-   Sentiment Analysis,
+
+-   Word Correlations,
+
+-   Clustering and
+
+-   LDA Topic Modelling.
 
 # Twitter Analysis
 
@@ -609,7 +623,7 @@ ggplot(relative_comp_sentiment, aes(x= Sentiment, y= score, fill=variable)) +
 
 On the first look, sentiments are similar for both smartphone models and are commented on with highly positive sentiments. This means that on both models, users are generally speaking positively about their smartphone.
 
-Apple has more topicality which might due to their marketing strategy or people just like to give attention and being involved in the discussion of their new product releasing. 
+Apple has more topicality which might due to their marketing strategy or people just like to give attention and being involved in the discussion of their new product releasing.
 
 Samsung S22 has more trust and anticipation while iPhone 13 brings more joy to its users but also more sadness, surprise, fear and disgust.
 
