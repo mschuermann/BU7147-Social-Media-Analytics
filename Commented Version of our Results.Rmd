@@ -61,22 +61,37 @@ Apple advertises the iPhone Pro with the following features:
 
 ## Comparison of Features
 
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 |                             | Samsung S22                                                                            | Apple iPhone 13                           |
-|-----------------------------|----------------------------------------------------------------------------------------|-------------------------------------------|
++=============================+========================================================================================+===========================================+
 | **Starting Price**          | \$799                                                                                  | \$799                                     |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Screen size**             | 6.1 inches (2340 x 1080)                                                               | 6.1 inches (2532 x 1170)                  |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Refresh rate**            | 48Hz-120Hz adaptive                                                                    | 60Hz                                      |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **CPU**                     | Snapdragon 8 Gen 1 (US); Exynos 2200 (K)                                               | A15 Bionic                                |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **RAM**                     | 8GB                                                                                    | 4GB (based on teardowns)                  |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Storage**                 | 128GB, 256GB                                                                           | 128GB, 256GB, 512GB                       |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Rear cameras**            | 50MP wide (f/1.8); 12MP ultrawide (f/2.2); 10MP telephoto (f/2.4) with 3x optical zoom | 12MP main (f/1.6), 12MP ultrawide (f/2.4) |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Front camera**            | 10MP (f/2.2)                                                                           | 12MP (f/2.2)                              |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Battery size**            | 3,700 mAh                                                                              | 3,227 mAh (based on teardowns)            |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Battery life (Hrs:Mins)** | 7:51                                                                                   | 10:33                                     |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Charging speeds**         | 25W wired, 15W wireless                                                                | 20W wired; 15W wireless                   |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Size**                    | 5.7 x 2.8 x 0.3 inches                                                                 | 5.8 x 2.8 x 0.3 inches                    |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Weight**                  | 5.9 ounces                                                                             | 6.14 ounces                               |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Colors**                  | Black, white, green, pink gold                                                         | Black, white, blue, pink, red, green      |
++-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 
 Source: <https://www.tomsguide.com/face-off/samsung-galaxy-s22-vs-iphone-13>
 
@@ -1004,6 +1019,12 @@ a_assignments
 
 # Amazon Review Analysis
 
+For further analysis, we have decided to analyse the Amazon product reviews for both the phones in order to understand if the sentiments of customers on Twitter and Amazon were matching or not.
+
+To do this, the first step was to collect the data. We faced a similar situation for collecting the data, Samsung S22 had very few reviews and the iPhone 13 had a large amount of reviews. So, to collect more data, we used Amazon reviews from different country websites like UK, India, USA and Australia. Specifically, English reviews were selected to proceed with the analysis.
+
+The following R code was implemented to collect data from different Amazon websites. ([<https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/>](https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/){.uri})
+
 ```{r Initialising Packages Amazon, message=FALSE, warning=FALSE, include=FALSE}
 library(readxl)
 library(twitteR)
@@ -1034,6 +1055,96 @@ library(widyr)
 library(tidyr)
 library(tidytext)
 library(base64enc)
+```
+
+## Data Scraping from Amazon
+
+```{r}
+# #Scraping Product Reviews from Amazon
+# 
+# #import libraries
+# library(rvest)
+# library(stringr)
+# library(xml2)
+# library(tidyverse)
+# 
+# 
+# scrape_amazon <- function(ASIN, page_num){
+#   
+#   #amazon_uk
+#   #url_reviews <- paste0("https://www.amazon.co.uk/product-reviews/",ASIN,"/?pageNumber=",page_num)
+#   #amazon.com
+#   #url_reviews <- paste0("https://www.amazon.com/product-reviews/",ASIN,"/?pageNumber=",page_num)
+#   #amazon.in
+#   #url_reviews <- paste0("https://www.amazon.in/product-reviews/",ASIN,"/?pageNumber=",page_num)
+#   
+#   #amazon.com.au
+#   url_reviews <- paste0("https://www.amazon.com.au/product-reviews/",ASIN,"/?pageNumber=",page_num)
+#   
+#   doc <- read_html(url_reviews) # Assign results to `doc`
+#   
+#   # Review Title
+#   doc %>% 
+#     html_nodes("[class='a-size-base a-link-normal review-title a-color-base review-title-content a-text-bold']") %>%
+#     html_text() -> review_title1
+#   
+#   review_title <- str_squish(review_title1)
+#   
+#   # Review Text
+#   doc %>% 
+#     html_nodes("[class='a-size-base review-text review-text-content']") %>%
+#     html_text() -> review_text1
+#   
+#   review_text <- str_squish(review_text1)
+#   
+#   # Number of stars in review
+#   doc %>%
+#     html_nodes("[data-hook='review-star-rating']") %>%
+#     html_text() -> review_star1
+#   
+#   review_star <- str_squish(review_star1)
+#   
+#   # Date 
+#   
+#   doc %>%
+#     html_nodes("[data-hook='review-date']") %>%
+#     html_text() -> review_date1
+#   review_date <- str_squish(review_date1)
+#   
+#   # Return a tibble
+#  tibble(review_title,
+#          review_text,
+#          review_star,
+#          review_date,
+#          page = page_num) %>% return()
+# }
+# 
+# 
+# ASIN <- "B09MW17JQY" # Specify ASIN
+# page_range <- 1 # Let's say we want to scrape pages 1 to 10
+# 
+# match_key <- tibble(n = page_range,
+#                     key = sample(page_range,length(page_range)))
+# 
+# lapply(page_range, function(i){
+#   j <- match_key[match_key$n==i,]$key
+#   
+#   message("Getting page ",i, " of ",length(page_range), "; Actual: page ",j) # Progress bar
+#   
+#   Sys.sleep(3) # Take a three second break
+#   
+#   if((i %% 3) == 0){ # After every three scrapes... take another two second break
+#     
+#     message("Taking a break...") # Prints a 'taking a break' message on your console
+#     
+#     Sys.sleep(2) # Take an additional two second break
+#   }
+#   scrape_amazon(ASIN = ASIN, page_num = j) # Scrape
+# }) -> output_list
+# 
+# 
+# write.csv(output_list,"C:\\Users\\Shruthi\\OneDrive\\Documents\\Semester 2\\Social Media Analytics\\Group Assignment\\Samsung_Australia.csv",row.names = FALSE)
+
 ```
 
 ## Data Input
