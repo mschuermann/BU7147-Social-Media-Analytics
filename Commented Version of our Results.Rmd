@@ -1600,6 +1600,16 @@ samsung.correlation.terms %>%
   ggtitle("Correlation of terms in Samsung S22 Reviews")
 ```
 
+Which words are correlating with each
+
+-   **Snapdragon feature** means the [**Qualcomm Snapdragon 8 Gen 1**](https://www.androidauthority.com/qualcomm-snapdragon-8-gen-1-3063350/) is the processor that the S22 uses in the US models. Other countries in the world receive an Samsung S22 models which uses Samsung's own processor [**Qualcomm Snapdragon 8 Gen 1**](https://www.androidauthority.com/qualcomm-snapdragon-8-gen-1-3063350/).
+
+-   **Fingerprint Reader** is Samsung's feature to unlock the phone. In contrast to the iPhone it still has a fingerprint reader instead of the Face ID but it doesn't have a scanner as a button but an ultrasonic screen that identifies the fingerprint.
+
+-   **Software issues app** could be related to the scandal of Game Optimising Service (GOS) app that slows down more than 10 thousand apps.
+
+-   **Battery life of Samsung S22**
+
 ```{r}
 # Correlation Terms
 # The correlation of appearing together in a review
