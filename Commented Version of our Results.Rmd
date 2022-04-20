@@ -615,7 +615,7 @@ ggplot(data=sentimentscores_apple,aes(x=sentiment,y=score))+
   xlab("sentiment") +ylab("score")+ ggtitle("Total Sentiment Score based on Tweets about Apple")
 ```
 
-```{r Comparison, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Comparison, echo=TRUE, message=FALSE}
 relative_comp_sentiment <- data.frame(Sentiment = sentimentscores_apple$sentiment, Apple_iPhone_13 = sentimentscores_apple$score/sum(sentimentscores_apple$score)*100, Samsung_S22 = sentimentscores$score/sum(sentimentscores$score)*100) %>%
   melt(id.vars = 1, variable.name = "variable",
            value.name="score")
@@ -645,8 +645,12 @@ round(sd(sentimentr_apple$ave_sentiment),2)),
 "Word Count"=c(round(mean(sentimentr_apple$word_count),2), round(var(sentimentr_apple$word_count),2),
 round(sd(sentimentr_apple$word_count),2)))
 
+library(scales)
 #rescale to a scale of 1 to 5
-a_tweets_scale_5 <- mean(rescale(sentimentr_apple$ave_sentiment, to = c(1,5), from = c(-1,1)))
+a_tweets_scale_5 <- sentimentr_apple$ave_sentiment %>%
+  rescale(to = c(1,5), from = c(-1,1)) %>%
+  mean()
+
 ```
 
 ```{r Samsung Sentiment Statistics, message=FALSE, warning=FALSE}
