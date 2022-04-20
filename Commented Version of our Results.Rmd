@@ -1279,7 +1279,7 @@ iphone.reviews.text$review_text <- removePunctuation(iphone.reviews.text$review_
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 shifted.words <- samsung.reviews.text %>%
   unnest_tokens(bigram, review_text, token = "ngrams", n = 2)%>%
   dplyr::count(bigram, sort = TRUE) %>%
@@ -1324,7 +1324,7 @@ samsung.reviews.text
 
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 shifted.words <- iphone.reviews.text %>%
   unnest_tokens(bigram, review_text, token = "ngrams", n = 2)%>%
   dplyr::count(bigram, sort = TRUE) %>%
@@ -1434,7 +1434,7 @@ iphone.reviews.text %>%
 
 ```
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 # Bing Samsung
 bing.mean.score_s <- word.freq.table_s %>% 
   inner_join(get_sentiments("bing")) %>%
@@ -1534,7 +1534,7 @@ apple.correlation.terms %>%
 
 ```
 
-```{r}
+```{r include=FALSE}
 bigrams.network.df_s <- samsung.reviews.text %>%
   unnest_tokens(bigram, review_text, token = "ngrams", n = 2) %>%
   separate(bigram, c("word1", "word2"), sep = " ") %>%
@@ -1556,31 +1556,7 @@ bigrams.network_a <- graph_from_data_frame(bigrams.network.df_a)
 bigrams.network_a
 ```
 
-```{r}
-# now we find the centrality measures of the network
-# degree:the number of its adjacent edges (measure of direct influence)
-deg_s <- degree(bigrams.network_s, mode = "all")
-
-#K-core decomposition allows us to identify the core and the periphery of the network. A k-core is a maximal subnet of a network such that all nodes have at least degree K.
-core_s <- coreness(bigrams.network_s, mode = "all")
-
-# betweenness measures brokerage or gatekeeping potential. It is (approximately) the number of shortest paths between nodes that pass through a particular node.
-betw_s <- betweenness(bigrams.network_s)
-
-#Eigenvector centrality is a measure of being well-connected connected to the well-connected. First eigenvector of the graph adjacency matrix. Only works with undirected networks.
-eigen_s <- eigen_centrality(bigrams.network_s, directed = TRUE)
-members_s <- cluster_walktrap(bigrams.network_s)
-
-library(igraph)
-bigrams.network_s <- simplify(bigrams.network_s
-                            #remove.multiple = FALSE, #error occured ?
-                            #remove.loops = TRUE)
-)
-V(bigrams.network_s)$color <- members$membership+1
-
-```
-
-```{r}
+```{r Network for Samsung, message=FALSE, warning=FALSE}
 # now we find the centrality measures of the network
 # degree:the number of its adjacent edges (measure of direct influence)
 deg_s <- degree(bigrams.network_s, mode = "all")
@@ -1618,52 +1594,53 @@ plot(bigrams.network_s,
 )
 mtext("Coreness")
 
+# Other sizes we tried but Coreness worked best for our models
 # Using "Degree" as size
 # degree=mode (number of edges of the node, in-degree:prestige
-
-plot(bigrams.network_s,
-     layout = layout_with_fr,
-     vertex.label.color = "black",
-     vertex.label.cex = 0.9,
-     vertex.label.dist = 0,
-     vertex.frame.color = 0,
-     vertex.size = deg_s, 
-     edge.arrow.size = 0.01,
-     edge.curved = 0.7,
-     edge.color = "gray",
-     main = "Bigram Communities (Samsung)"
-)
-mtext("Degree")
-
-# Using "Eigenvector Centrality" as size
-# centrality (the most connected words)
-plot(bigrams.network_s,
-     layout = layout_with_fr,
-     vertex.label.color = "black",
-     vertex.label.cex = 0.8,
-     vertex.label.dist = 0,
-     vertex.size = eigen_s$vector*20, 
-     edge.arrow.size = 0.01,
-     edge.curved = 0.7,
-     edge.color = "black",
-     main = "Bigram Communities (Samsung)"
-)
-mtext("Eigenvector Centrality")
-
-# Using "Betweenness" as size
-#Betweenness -> median (weighted # of paths going through the node)
-plot(bigrams.network_s,
-     layout = layout_with_fr,
-     vertex.label.color = "black",
-     vertex.label.cex = 0.8,
-     vertex.label.dist = 0,
-     vertex.size = betw_s, 
-     edge.arrow.size = 0.01,
-     edge.curved = 0.7,
-     edge.color = "lightgrey",
-     main = "Bigram Communities (Samsung)"
-)
-mtext("Betweenness")
+# 
+# plot(bigrams.network_s,
+#      layout = layout_with_fr,
+#      vertex.label.color = "black",
+#      vertex.label.cex = 0.6,
+#      vertex.label.dist = 0,
+#      vertex.frame.color = 0,
+#      vertex.size = deg_s, 
+#      edge.arrow.size = 0.1,
+#      edge.curved = 1,
+#      edge.color = "gray",
+#      main = "Bigram Communities (Samsung)"
+# )
+# mtext("Degree")
+# 
+# # Using "Eigenvector Centrality" as size
+# # centrality (the most connected words)
+# plot(bigrams.network_s,
+#      layout = layout_with_fr,
+#      vertex.label.color = "black",
+#      vertex.label.cex = 0.6,
+#      vertex.label.dist = 0,
+#      vertex.size = eigen_s$vector*20, 
+#      edge.arrow.size = 0.1,
+#      edge.curved = 1,
+#      edge.color = "gray",
+#      main = "Bigram Communities (Samsung)"
+# )
+# mtext("Eigenvector Centrality")
+# 
+# # Using "Betweenness" as size
+# #Betweenness -> median (weighted # of paths going through the node)
+# plot(bigrams.network_s,
+#      layout = layout_with_fr,
+#      vertex.label.color = "black",
+#      vertex.label.cex = 0.6,
+#      vertex.label.dist = 0,
+#      vertex.size = betw_s, 
+#      edge.arrow.size = 0.1,
+#      edge.curved = 1,
+#      edge.color = "gray",
+#      main = "Bigram Communities (Samsung)"
+# )
+# mtext("Betweenness")
 
 ```
 
@@ -1694,62 +1671,63 @@ V(bigrams.network_a)$color <- members_a$membership+1
 plot(bigrams.network_a,
      layout = layout_with_fr,
      vertex.label.color = "black",
-     vertex.label.cex = 0.9,
+     vertex.label.cex = 0.6,
      vertex.label.dist = 0,
      vertex.frame.color = 0,
      vertex.size = core_a*10, 
-     edge.arrow.size = 0.01,
-     edge.curved = 0.7,
+     edge.arrow.size = 0.1,
+     edge.curved = 1,
      edge.color = "gray",
      main = "Bigram Communities (iPhone 13)"
 )
 mtext("Coreness")
 
-# Using "Degree" as size
-# degree=mode (number of edges of the node, in-degree:prestige
-
-plot(bigrams.network_a,
-     layout = layout_with_fr,
-     vertex.label.color = "black",
-     vertex.label.cex = 0.9,
-     vertex.label.dist = 0,
-     vertex.frame.color = 0,
-     vertex.size = deg_a, 
-     edge.arrow.size = 0.01,
-     edge.curved = 0.7,
-     edge.color = "gray",
-     main = "Bigram Communities (iPhone 13)"
-)
-mtext("Degree")
-
-# Using "Eigenvector Centrality" as size
-# centrality (the most connected words)
-plot(bigrams.network_a,
-     layout = layout_with_fr,
-     vertex.label.color = "black",
-     vertex.label.cex = 0.8,
-     vertex.label.dist = 0,
-     vertex.size = eigen_a$vector*20, 
-     edge.arrow.size = 0.01,
-     edge.curved = 0.7,
-     edge.color = "black",
-     main = "Bigram Communities (iPhone 13)"
-)
-mtext("Eigenvector Centrality")
-
-# Using "Betweenness" as size
-#Betweenness -> median (weighted # of paths going through the node)
-plot(bigrams.network_a,
-     layout = layout_with_fr,
-     vertex.label.color = "black",
-     vertex.label.cex = 0.8,
-     vertex.label.dist = 0,
-     vertex.size = betw_a, 
-     edge.arrow.size = 0.01,
-     edge.curved = 0.7,
-     edge.color = "lightgrey",
-     main = "Bigram Communities (iPhone 13)"
-)
-mtext("Betweenness")
+# Other sizes we tried but Coreness worked best for our models
+# # Using "Degree" as size
+# # degree=mode (number of edges of the node, in-degree:prestige
+# 
+# plot(bigrams.network_a,
+#      layout = layout_with_fr,
+#      vertex.label.color = "black",
+#      vertex.label.cex = 0.6,
+#      vertex.label.dist = 0,
+#      vertex.frame.color = 0,
+#      vertex.size = deg_a, 
+#      edge.arrow.size = 0.1,
+#      edge.curved = 1,
+#      edge.color = "gray",
+#      main = "Bigram Communities (iPhone 13)"
+# )
+# mtext("Degree")
+# 
+# # Using "Eigenvector Centrality" as size
+# # centrality (the most connected words)
+# plot(bigrams.network_a,
+#      layout = layout_with_fr,
+#      vertex.label.color = "black",
+#      vertex.label.cex = 0.6,
+#      vertex.label.dist = 0,
+#      vertex.size = eigen_a$vector*20, 
+#      edge.arrow.size = 0.1,
+#      edge.curved = 1,
+#      edge.color = "gray",
+#      main = "Bigram Communities (iPhone 13)"
+# )
+# mtext("Eigenvector Centrality")
+# 
+# # Using "Betweenness" as size
+# #Betweenness -> median (weighted # of paths going through the node)
+# plot(bigrams.network_a,
+#      layout = layout_with_fr,
+#      vertex.label.color = "black",
+#      vertex.label.cex = 0.6,
+#      vertex.label.dist = 0,
+#      vertex.size = betw_a, 
+#      edge.arrow.size = 0.1,
+#      edge.curved = 1,
+#      edge.color = "grey",
+#      main = "Bigram Communities (iPhone 13)"
+# )
+# mtext("Betweenness")
 
 ```
