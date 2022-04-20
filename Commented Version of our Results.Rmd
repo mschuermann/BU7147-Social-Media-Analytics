@@ -930,7 +930,7 @@ ms2 <- as.matrix(tdm_s2)
 distMatrix_s <- dist(scale(ms2))
 fit_s <- hclust(distMatrix_s, method = "ward.D")
 plot(fit_s)
-rect.hclust(fit_s, k = 9,border = "red") # cut tree into 6 clusters
+rect.hclust(fit_s, k = 9,border = "red") # cut tree into 9 clusters
 ```
 
 ```{r Clustering Apple}
@@ -942,8 +942,10 @@ ma2 <- as.matrix(tdm_a2)
 distMatrix_a <- dist(scale(ma2))
 fit_a <- hclust(distMatrix_a, method = "ward.D")
 plot(fit_a)
-rect.hclust(fit_a, k = 9,border = "red") # cut tree into 6 clusters
+rect.hclust(fit_a, k = 9,border = "red") # cut tree into 9 clusters
 ```
+
+The two most talked about models are the iPhone 13 Pro Max and Samsung Galaxy S22 Ultra. All these terms are already mentioned in other parts of our analysis. Anyways, it is interesting that Apple tweets are more talking about phone cases and new Apple [product?] which "just" "can" "get", while Samsung tweets are comparing the new phone series in the first place to Apple products and apparently discuss about which has the best camera.
 
 ## LDA Topic Modelling
 
@@ -987,21 +989,16 @@ s_models <- list(
                                                                thin = 100,    iter = 1000))
 )
 
-# There you have it. Models now holds 4 topics. See the topicmodels API documentation for details
+# See the topicmodels API documentation for details
 
 # Top 10 terms of each topic for each model
 # Do you see any themes you can label to these "topics" (lists of words)?
-lapply(s_models, terms, 10)
+lapply(s_models, terms, 5)
 
 s_assignments <- sapply(s_models, topics) 
 
 s_assignments
-
-
-### still missing: graphs depict the probability distributions for all the terms each LDA topic has 10 terms which is independent of terms in other LDA topic
 ```
-
-The topics about "seri", "now", "camera", "update" relates to the [S22 Ultra's April patch that introduced many camera-related features](https://www.androidpolice.com/samsungs-april-2022-security-update-is-arriving-for-galaxy-owners-in-the-us/).
 
 ### Apple iPhone 13
 
@@ -1024,11 +1021,9 @@ a_corpus <- tm_map(a_corpus, removeWords, c("galaxi", "samsung", "galaxy", "ultr
 a_doc.lengths <- rowSums(as.matrix(DocumentTermMatrix(a_corpus)))
 a_dtm <- DocumentTermMatrix(a_corpus)
 
-# Now for some topics
 SEED = sample(1:1000000, 1) 
 k = 3
 
-# This might take a minute!
 a_models <- list(
   CTM       = CTM(a_dtm, k = k, control = list(seed = SEED, var = list(tol = 10^-4), em = list(tol = 10^-3))),
   VEM       = LDA(a_dtm, k = k, control = list(seed = SEED)),
@@ -1037,16 +1032,12 @@ a_models <- list(
                                                                  thin = 100,    iter = 1000))
 )
 
-# Top 10 terms of each topic for each model
 # Do you see any themes you can label to these "topics" (lists of words)?
-lapply(a_models, terms, 10)
+lapply(a_models, terms, 5)
 
 a_assignments <- sapply(a_models, topics) 
 
 a_assignments
-
-
-### still missing: graphs depict the probability distributions for all the terms each LDA topic has 10 terms which is independent of terms in other LDA topic
 ```
 
 # Amazon Review Analysis
@@ -1851,12 +1842,12 @@ mtext("Coreness")
 
 # Recommendations
 
-People talk about Apple much more emotional in both directions and with a fewer focus on exact descriptions of their issues or positive features. This is because Apple products get advertised and reminded more by the focus on the brand while Samsung always is compared by real features. This is something also coming from the ecosystem of Apple devices that work together smoothly. It is an argument for people to stay loyal to Apple products and increases the barrier to switch. Samsung does not promote the ecosystem in the same way, that's why it is a competitive advantage for Apple. Samsung has to work on their cooperation of devices.
+People talk about Apple much more emotional in both directions and with a fewer focus on exact descriptions of their issues or positive features. This is because Apple products get advertised and reminded more by the focus on the brand while Samsung always is compared by real features. This is something also coming from the ecosystem of Apple devices that work together smoothly. It is an argument for people to stay loyal to Apple products and increases the barrier to switch. Samsung does not promote the ecosystem in the same way, that's why it is a competitive advantage for Apple. Samsung has to work on their communication and connectivity of Samsung devices.
 
 Samsung had the scandal of Game Optimisation System (GOS) app slowing phones and over 10 thousand apps down. This could be used by Apple to advertise that their processor is working at full power and people have to pay a high price for their device (one of the highest negative sentiments in our analysis) but they can - in contrast - use the processor power without disadvantages that they are paying for.
 
 Apple should introduce a Rose Quartz and/or Serenity (or a combination of both) iPhone colour and/or new accessorizes in these colours because people are talking a lot about it and want it. This could be a market gap that they could take advantage of.
 
-The highest advertising focus is on cameras at both product series. People also discuss cameras a lot, comparing both models about that and make purchase decisions accordingly. ["Differences in color [lie mainly in] temperature, depending on the scene. The Galaxy S22 Ultra tends to have a cooler tone, while the ‌iPhone 13 Pro‌ Max is warmer. The S22 Ultra also tends to elevate highlights, and while it can sometimes appear sharper, some may find the images to be a bit too washed out because of it."](https://www.macrumors.com/2022/03/03/galaxy-s22-ultra-vs-iphone-13-pro-max/) The zoom also tends to be in a higher resolution at Samsung S22. Apple introduced the new Cinematic mode, as already mentioned before, and is still better in video recording quality. All feedback on the front camera of Apple is really negative while it is really positive on the rear camera. The rear camera is the one advertised by Apple. Therefore, people keep discussing about the pros and cons of each camera and its a tough decision depending on the neck-and-neck race. Definitely, both companies do good on working and improving the camera systems, for Apple, it should be the next move to improve the front camera's quality.
+The highest advertising focus is on cameras at both product series. People also discuss cameras a lot, comparing both models about that and make purchase decisions accordingly. ["Differences in color [lie mainly in] temperature, depending on the scene. The Galaxy S22 Ultra tends to have a cooler tone, while the ‌iPhone 13 Pro‌ Max is warmer. The S22 Ultra also tends to elevate highlights, and while it can sometimes appear sharper, some may find the images to be a bit too washed out because of it."](https://www.macrumors.com/2022/03/03/galaxy-s22-ultra-vs-iphone-13-pro-max/) The zoom also tends to be in a higher resolution at Samsung S22. Apple has an ultra-wide angle while Samsung's is smaller. Apple introduced the new Cinematic mode, as already mentioned before, and is better in video recording quality. All feedback on the front camera of Apple is really negative while it is really positive on the rear camera. The rear camera is the one advertised by Apple. Therefore, people keep discussing about the pros and cons of each camera and its a tough decision depending on the neck-and-neck race. Definitely, both companies do good on working and improving the camera systems, for Apple, it should be the next move to improve the front camera's quality.
 
-In general, both phones are really highly advanced. "[While a couple of categories like performance and battery life are decisive victories for the iPhone, for the most part, this was a battle of inches](https://www.laptopmag.com/news/galaxy-s22-vs-iphone-13)". Companies should further promote the different aspects that they have, e.g. Samsung could advertise more about the S Pen and both could put greater emphasis on the different unlock systems.
+In general, both phones are really highly advanced. "[While a couple of categories like performance and battery life are decisive victories for the iPhone, for the most part, this was a battle of inches](https://www.laptopmag.com/news/galaxy-s22-vs-iphone-13)". Companies should further promote the different aspects that make them unique, e.g. Samsung could advertise more about the S Pen and its compatibility with the tablet and both could put greater emphasis on the different unlock systems, e.g. Samsung has Face Unlocking system and a fingerprint sensor as options.
