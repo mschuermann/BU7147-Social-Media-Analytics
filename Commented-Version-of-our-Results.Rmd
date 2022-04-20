@@ -1566,8 +1566,8 @@ iphone.review.stars <- iphone.reviews$review_star %>%
 
 
 compare.stars <- data.table(
-  " "= c("Average 5-Star-Score identified from Sentiments", "Average 5-Star-Score given by users", "Average 5-Star-Score identified from Tweets"),
-  "S22"=c(round(afinn.mean.score_s, digits=1), samsung.review.stars, round(s_tweets_scale_5,1)), 
+  "Metric"= c("Average 5-Star-Score identified from Sentiments", "Average 5-Star-Score given by users", "Average 5-Star-Score identified from Tweets"),
+  "Samsung S22"=c(round(afinn.mean.score_s, digits=1), samsung.review.stars, round(s_tweets_scale_5,1)), 
   "iPhone 13" = c(round(afinn.mean.score_a, digits=1), iphone.review.stars, round(s_tweets_scale_5,1)))
 compare.stars
 ```
