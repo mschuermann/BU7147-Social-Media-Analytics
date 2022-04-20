@@ -331,6 +331,8 @@ On 3 out of 9 days Samsung S22 had more tweets than iPhone 13. On the other days
 
 There is no similar indicator from [Google Trends](https://trends.google.com/trends/explore?date=2022-03-31%202022-04-08&q=iPhone%2013,Samsung%20S22,Apple,Samsung) or other sources. The search terms iPhone 13, Samsung S22, Apple and Samsung are relatively constant over time as you can see from the image below (Screenshot from Google Trends). It can be noted that Apple is more likely to be looked up than Samsung as well as the iPhone 13 is more popular on Google Search than Samsung S22. This gives us a first impression that the iPhone 13 model receives in general more attention.
 
+From a brand perspective, Samsung has more searches overall than Apple; and from their latest models, iPhones have more searches than Samsung mobile phones. This result may be because Samsung has a more diverse product range and series [Korea Expose](https://www.koreaexpose.com/samsung-products-basic-information/#:~:text=Samsung%20Electronics%2C%20the%20largest%20subsidiary,and%20security%2Fmonitoring%20systems%2C%20to) than Apple [Apple Wiki](https://apple.fandom.com/wiki/List_of_Apple_products) , but within the flagship phones of their brands, iPhone is getting more attention than Samsung S22.
+
 ![](images/paste-2D5004C2.png)
 
 There are more tweets than users which indicates that some users usually post more than one tweet. We calculated a ratio for this: `avg_tweets_per_user = tweets per day / users per day`.
@@ -607,6 +609,8 @@ ggplot(relative_comp_sentiment, aes(x= Sentiment, y= score, fill=variable)) +
 
 On the first look, sentiments are similar for both smartphone models and are commented on with highly positive sentiments. This means that on both models, users are generally speaking positively about their smartphone.
 
+Apple has more topicality which might due to their marketing strategy or people just like to give attention and being involved in the discussion of their new product releasing. 
+
 Samsung S22 has more trust and anticipation while iPhone 13 brings more joy to its users but also more sadness, surprise, fear and disgust.
 
 ```{r Apple Sentiment Statistics, message=FALSE, warning=FALSE}
@@ -762,6 +766,8 @@ ggplot(a_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
   ggtitle("Relative Importance of Positive Words")
 ```
 
+Positive words for Apple are seperated more evenly excluding the first one, while for Samsung the weightage of all the other positive words are relatively small other than the first two. Both the highest are "new" which indicates that people are discussing a lot to the newest model. More positive words for Apple are seemingly not that related to how people feel about the newsest model specifically but very general expression, while Samsung has more practical comments.
+
 ```{r Apple - Negative Sentiment, echo=FALSE}
 tail(sentimentterms_a,10)
 ```
@@ -780,6 +786,8 @@ ggplot(a_bigram_with_neg_sentiment, aes(x=bigrams, y=-weightage))+
     xlab("Negative Word") +
     ggtitle("Relative Importance of Negative Words")
 ```
+
+Negative words for Apple are mainly non-directional and more like a emotional vent which give little information about why people feel the negative way we detected about Apple, while we can clearly see Samsung is more or less affected by the scandal since there're many negative words around it.
 
 ## Word Correlation
 
@@ -1023,7 +1031,7 @@ For further analysis, we have decided to analyse the Amazon product reviews for 
 
 To do this, the first step was to collect the data. We faced a similar situation for collecting the data, Samsung S22 had very few reviews and the iPhone 13 had a large amount of reviews. So, to collect more data, we used Amazon reviews from different country websites like UK, India, USA and Australia. Specifically, English reviews were selected to proceed with the analysis.
 
-The following R code was implemented to collect data from different Amazon websites. ([<https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/>](https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/){.uri})
+The following R code was implemented to collect data from different Amazon websites. ([\<https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/\>](https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/){.uri})
 
 ```{r Initialising Packages Amazon, message=FALSE, warning=FALSE, include=FALSE}
 library(readxl)
