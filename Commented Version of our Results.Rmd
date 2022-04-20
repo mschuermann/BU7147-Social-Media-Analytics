@@ -345,7 +345,7 @@ On 3 out of 9 days Samsung S22 had more tweets than iPhone 13. On the other days
 
 There is no similar indicator from [Google Trends](https://trends.google.com/trends/explore?date=2022-03-31%202022-04-08&q=iPhone%2013,Samsung%20S22,Apple,Samsung) or other sources. The search terms iPhone 13, Samsung S22, Apple and Samsung are relatively constant over time as you can see from the image below (Screenshot from Google Trends). It can be noted that Apple is more likely to be looked up than Samsung as well as the iPhone 13 is more popular on Google Search than Samsung S22. This gives us a first impression that the iPhone 13 model receives in general more attention.
 
-From a brand perspective, Samsung has more searches overall than Apple; and from their latest models, iPhones have more searches than Samsung mobile phones. This result may be because Samsung has a more diverse product range and series [Korea Expose](https://www.koreaexpose.com/samsung-products-basic-information/#:~:text=Samsung%20Electronics%2C%20the%20largest%20subsidiary,and%20security%2Fmonitoring%20systems%2C%20to) than Apple [Apple Wiki](https://apple.fandom.com/wiki/List_of_Apple_products) , but within the flagship phones of their brands, iPhone is getting more attention than Samsung S22.
+From a brand perspective, Samsung has more searches overall than Apple; and from their latest models, iPhones have more searches than Samsung mobile phones. This result may be because Samsung has a more diverse product range and series [Korea Expose](https://www.koreaexpose.com/samsung-products-basic-information/#:~:text=Samsung%20Electronics%2C%20the%20largest%20subsidiary,and%20security%2Fmonitoring%20systems%2C%20to) than Apple [Apple Wiki](https://apple.fandom.com/wiki/List_of_Apple_products), but within the flagship phones of their brands, iPhone is getting more attention than Samsung S22. Apple has more topicality in the online discussions which might due to their marketing strategy or people just like to give attention and being involved in the discussion of their new product releasing.
 
 ![](images/paste-2D5004C2.png)
 
@@ -547,7 +547,7 @@ Samsung_df <- samsung_df$text %>%
 tail(Samsung_df)
 ```
 
-```{r Apple iPhone 13 data, echo=TRUE, message=FALSE, warning=FALSE}
+```{r Apple iPhone 13 data, echo=FALSE, message=FALSE, warning=FALSE}
 Apple_df <- apple_df$text %>%
   str_to_lower() %>% #all text to lower case
   replace_contraction() %>% #replaces contractions to longer form
@@ -575,7 +575,7 @@ tail(Apple_df)
 
 ### Sentiments in Tweets
 
-The sentiment analysis
+In the first step, we wanted to identify the general sentimental view for each of the two brands. Because we have different sizes in the data sets (Apple iPhone 13 database is larger than Samsung S22), we could not compare them in absolute numbers but had to compare relative values.
 
 ```{r Samsung Sentiment Scores, echo=FALSE, message=FALSE, warning=FALSE}
 ##### sentiment analysis #####
@@ -622,8 +622,6 @@ ggplot(relative_comp_sentiment, aes(x= Sentiment, y= score, fill=variable)) +
 ```
 
 On the first look, sentiments are similar for both smartphone models and are commented on with highly positive sentiments. This means that on both models, users are generally speaking positively about their smartphone.
-
-Apple has more topicality which might due to their marketing strategy or people just like to give attention and being involved in the discussion of their new product releasing.
 
 Samsung S22 has more trust and anticipation while iPhone 13 brings more joy to its users but also more sadness, surprise, fear and disgust.
 
@@ -1045,6 +1043,8 @@ For further analysis, we have decided to analyse the Amazon product reviews for 
 
 To do this, the first step was to collect the data. We faced a similar situation for collecting the data, Samsung S22 had very few reviews and the iPhone 13 had a large amount of reviews. So, to collect more data, we used Amazon reviews from different country websites like UK, India, USA and Australia. Specifically, English reviews were selected to proceed with the analysis.
 
+We have to admit that there is only one review section for all Samsung models in the variants of the series S22. The same is valid for all variants of iPhone 13 series.
+
 The following R code was implemented to collect data from different Amazon websites. ([\<https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/\>](https://martinctc.github.io/blog/vignette-scraping-amazon-reviews-in-r/){.uri})
 
 ```{r Initialising Packages Amazon, message=FALSE, warning=FALSE, include=FALSE}
@@ -1346,25 +1346,80 @@ iphone.reviews.text
 
 ## Wordcloud
 
+### Samsung S22 Reviews
+
+```{r}
+samsung.reviews.text <- samsung.reviews$review_text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  str_replace_all("issue", "issues") %>%
+  removeNumbers() %>%
+  removeWords(stopwords("english")) %>%
+  make_plural() %>%
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique() #remove duplicates
+
+samsung.reviews.text <- data.frame(samsung.reviews.text)
+```
+
 ```{r Samsung Wordcloud Amazon, echo=FALSE, message=FALSE, warning=FALSE}
 # if you want to ignore words that are frequent but doesn't help, add them to this list. ###Ignore the words
 ignore.words <- data_frame(word = c( "samsung","phone"))
 
 # create the words freq table
 word.freq.table_s <- samsung.reviews.text %>% 
-  unnest_tokens(word, review_text) %>%
+  unnest_tokens(word, samsung.reviews.text) %>%
   anti_join(stop_words) %>%
   anti_join(ignore.words) %>%
-  dplyr::count(word, sort = TRUE)
+  dplyr::count(word, sort = TRUE) %>%
+  mutate(percentage=n/sum(n))
 word.freq.table_s
 
 # Plotting a Wordcloud
 word.freq.table_s %>% 
-  filter(n>8) %>%
+  filter(percentage>0.005) %>%
   with(wordcloud(word, n,
                  scale = c(5,0.3),
                  colors = brewer.pal(8, "Dark2")))
 
+```
+
+### iPhone 13 reviews
+
+```{r}
+iphone.reviews.text <- iphone.reviews$review_text %>%
+  str_to_lower() %>% #all text to lower case
+  replace_contraction() %>% #replaces contractions to longer form
+  replace_internet_slang() %>% #replaces common internet slang
+  replace_hash(replacement = "") %>% #removes hashtags
+  replace_word_elongation() %>% #removes word elongation, e.g. "heeeeey" to "hey"
+  str_squish() %>% #reduces repeated whitespace inside a string
+  str_trim() %>% #removes whitespace from start and end of string
+  {gsub("(RT|via)((?:\\b\\W*@\\w+)+)","",.)} %>% #remove RT (retweets)
+  {gsub("http[^[:blank:]]+","",.)} %>% #remove links that start with http
+  {gsub("@\\u+","",.)} %>% #remove names 
+  {gsub('@\\w+', '', .)} %>% # remove at people
+  {gsub("[[:punct:]]"," ",.)} %>%#remove punctuation
+  {gsub("[^[:alnum:]]"," ",.)}%>%#remove punctuation
+  removeNumbers() %>%
+  removeWords(stopwords("english")) %>%
+  str_replace_all("issue", "issues") %>%
+  make_plural() %>%
+  stringr::str_replace_all(stopwords_regex, '') %>% #remove stop words
+  unique() #remove duplicates
+
+iphone.reviews.text <- data.frame(iphone.reviews.text)
 ```
 
 ```{r Wordcloud Apple Amazon, echo=FALSE, message=FALSE, warning=FALSE}
@@ -1373,34 +1428,43 @@ ignore.words <- data_frame(word = c("iphone", "phone","apple", "13"))
 
 # create the words freq table
 word.freq.table_a<- iphone.reviews.text %>% 
-  unnest_tokens(word, review_text) %>%
+  unnest_tokens(word, iphone.reviews.text) %>%
   anti_join(stop_words) %>%
   anti_join(ignore.words) %>%
-  dplyr::count(word, sort = TRUE)
+  dplyr::count(word, sort = TRUE) %>%
+  mutate(percentage=n/sum(n))
 word.freq.table_a
 
 # Plotting a Wordcloud
 word.freq.table_a %>% 
-  filter(n>8) %>%
+  filter(percentage>0.005) %>%
   with(wordcloud(word, n,
                  scale = c(5,0.3),
                  colors = brewer.pal(8, "Dark2")))
 
 ```
 
+### Insights
+
+Both products have in common that people review on the camera of the phone mostly. For Samsung S22 this is followed by the display and screen. For Apple iPhone 13 this is followed by the battery. The screen is also mentioned at the iPhone 13 reviews while the battery life is mostly not mentioned for Samsung S22.
+
+For Apple words like "amazing" and "nice" are frequently mentioned while Samsung has "issues". On the other hand, Samsung S22 gets attention for the performance while iPhone 13 for its prices.
+
 ## Sentiment Analysis
+
+### Samsung S22
 
 ```{r Positive and negative words Amazon Samsung, echo=FALSE, message=FALSE, warning=FALSE}
 # Most common Positive and Negative words using Bing
 samsung.reviews.text %>% 
-  unnest_tokens(word, review_text) %>%
+  unnest_tokens(word, samsung.reviews.text) %>%
   anti_join(stop_words) %>%
   anti_join(ignore.words) %>%
   inner_join(get_sentiments("bing")) %>%
   dplyr::count(word, sentiment, sort = TRUE) %>%
-  filter(n > 2) %>%
   mutate(word = reorder(word, n)) %>%
   mutate(percent = round(n/sum(n), 3)) %>%
+  filter(percent > 0.01) %>%
   ggplot(aes(x = word, y = percent, fill = sentiment, label = percent)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~sentiment, scales = "free_y") +
@@ -1412,17 +1476,19 @@ samsung.reviews.text %>%
 
 ```
 
+### Apple iPhone 13
+
 ```{r Positive and negative words Amazon Apple, echo=FALSE, message=FALSE, warning=FALSE}
 # Most common Positive and Negative words using Bing
 iphone.reviews.text %>% 
-  unnest_tokens(word, review_text) %>%
+  unnest_tokens(word, iphone.reviews.text) %>%
   anti_join(stop_words) %>%
   anti_join(ignore.words) %>%
   inner_join(get_sentiments("bing")) %>%
   dplyr::count(word, sentiment, sort = TRUE) %>%
-  filter(n > 2) %>%
   mutate(word = reorder(word, n)) %>%
   mutate(percent = round(n/sum(n), 3)) %>%
+  filter(percent > 0.01) %>%
   ggplot(aes(x = word, y = percent, fill = sentiment, label = percent)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~sentiment, scales = "free_y") +
@@ -1486,7 +1552,7 @@ data.table(afinn.mean.score_s, afinn.mean.score_a)
 # The correlation of appearing together in a review
 samsung.correlation.terms <- samsung.reviews.text %>%
   mutate(review = row_number()) %>%
-  unnest_tokens(word, review_text) %>%
+  unnest_tokens(word, samsung.reviews.text) %>%
   filter(!word %in% stop_words$word) %>%
   group_by(word) %>%
   filter(n() >=7)%>%
@@ -1512,7 +1578,7 @@ samsung.correlation.terms %>%
 # The correlation of appearing together in a review
 apple.correlation.terms <- iphone.reviews.text %>%
   mutate(review = row_number()) %>%
-  unnest_tokens(word, review_text) %>%
+  unnest_tokens(word, iphone.reviews.text) %>%
   filter(!word %in% stop_words$word) %>%
   group_by(word) %>%
   filter(n() >= 5)%>%
@@ -1536,7 +1602,7 @@ apple.correlation.terms %>%
 
 ```{r include=FALSE}
 bigrams.network.df_s <- samsung.reviews.text %>%
-  unnest_tokens(bigram, review_text, token = "ngrams", n = 2) %>%
+  unnest_tokens(bigram, samsung.reviews.text, token = "ngrams", n = 2) %>%
   separate(bigram, c("word1", "word2"), sep = " ") %>%
   filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word) %>%
   dplyr::count(word1, word2, sort = TRUE) %>%
@@ -1546,7 +1612,7 @@ bigrams.network_s <- graph_from_data_frame(bigrams.network.df_s)
 bigrams.network_s
 
 bigrams.network.df_a <-iphone.reviews.text %>%
-  unnest_tokens(bigram, review_text, token = "ngrams", n = 2) %>%
+  unnest_tokens(bigram, iphone.reviews.text, token = "ngrams", n = 2) %>%
   separate(bigram, c("word1", "word2"), sep = " ") %>%
   filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word) %>%
   dplyr::count(word1, word2, sort = TRUE) %>%
