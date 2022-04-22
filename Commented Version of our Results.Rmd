@@ -719,15 +719,15 @@ s_bigram_counted$sentiment <- get_sentiment(s_bigram_counted$bigrams)
 ggplot(s_bigram_counted, aes(x=bigrams, y=freq))+
   geom_col()
 s_bigram_with_sentiment <- s_bigram_counted %>%
-  mutate(weightage = sentiment*freq) %>%
+  mutate(weightage = sentiment*freq/sum(sentiment*freq)) %>%
   arrange(desc(weightage)) %>%
-  top_n(10)
+  top_n(3)
 
 ggplot(s_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
   geom_col()+
   theme(axis.text = element_text(size = 5))+
   xlab("Positive Word") +
-  ggtitle("Relative Importance of Positive Words")
+  ggtitle("Samsung - Relative Importance of Positive Words")
 ```
 
 ```{r Samsung - Negative Sentiments, echo=FALSE}
@@ -738,16 +738,16 @@ tail(sentimentterms_s,10)
 ##### Creating a plot of the negative words most frequently used #####
 
 s_bigram_with_neg_sentiment <- s_bigram_counted %>%
-  mutate(weightage = sentiment*freq) %>%
+  mutate(weightage = sentiment*freq/sum(sentiment*freq)) %>%
+  filter(!bigrams %in% "phantom") %>%
   arrange(desc(weightage)) %>%
-  tail(10)
+  tail(3)
 
 ggplot(s_bigram_with_neg_sentiment, aes(x=bigrams, y=-weightage))+
   theme(axis.text = element_text(size = 5))+
   geom_col()+
-    xlab("Negative Word") +
-  ggtitle("Relative Importance of Negative Words")
-
+  xlab("Negative Word") +
+  ggtitle("Samsung - Relative Importance of Negative Words")
 ```
 
 The word scandal is related to the GOS app that slowed Samsung phones down on purpose to save battery life without notifying the user about it, affecting the performance of over 10 thousand apps. This scandal seems to have the most negative impact on the sentiments of Samsung users.
@@ -777,15 +777,15 @@ a_bigram_counted$sentiment <- get_sentiment(a_bigram_counted$bigrams)
 # ggplot(a_bigram_counted, aes(x=bigrams, y=freq))+
 #   geom_col()
 a_bigram_with_sentiment <- a_bigram_counted %>%
-  mutate(weightage = sentiment*freq) %>%
+  mutate(weightage = sentiment*freq/sum(sentiment*freq)) %>%
   arrange(desc(weightage)) %>%
-  top_n(10)
+  top_n(3)
 
 ggplot(a_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
   theme(axis.text = element_text(size = 5))+
   geom_col()  +
   xlab("Positive Word") +
-  ggtitle("Relative Importance of Positive Words")
+  ggtitle("Apple - Relative Importance of Positive Words")
 ```
 
 Positive words for Apple are seperated more evenly excluding the first one, while for Samsung the weightage of all the other positive words are relatively small other than the first two. Both the highest are "new" which indicates that people are discussing a lot to the newest model. More positive words for Apple are seemingly not that related to how people feel about the newsest model specifically but very general expression, while Samsung has more practical comments.
@@ -798,9 +798,10 @@ tail(sentimentterms_a,10)
 ##### Creating a plot of the negative words most frequently used #####
 
 a_bigram_with_neg_sentiment <- a_bigram_counted %>%
-  mutate(weightage = sentiment*freq) %>%
+  mutate(weightage = sentiment*freq/sum(sentiment*freq)) %>%
+  filter(!bigrams %in% c("downgrade", "fuck", "shit", "ass")) %>%
   arrange(desc(weightage)) %>%
-  tail(10)
+  tail(3)
 
 ggplot(a_bigram_with_neg_sentiment, aes(x=bigrams, y=-weightage))+
     theme(axis.text = element_text(size = 5))+
@@ -855,7 +856,9 @@ s_word_cors %>%
 
 ```{r CorrelationSamsung, echo=FALSE}
 s_word_cors %>%
-  filter(correlation > .55) %>%
+  filter(correlation > .50) %>%
+  filter(!item1 %in% c("liked", "youtube", "g")) %>%
+  filter(!item2 %in% c("liked", "youtube", "g")) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
@@ -908,7 +911,9 @@ a_word_cors %>%
 
 ```{r CorrelationApple, echo=FALSE}
 a_word_cors %>%
-  filter(correlation > .55) %>%
+  filter(correlation > .50) %>%
+  filter(!item1 %in% c("volumes", "jamaican", "apr", "traded", "exchange", "stock", "downgrade", "pixel", "don", "laughing", "loud", "draw", "lucky")) %>%
+  filter(!item2 %in% c("volumes", "jamaican", "apr", "traded", "exchange", "stock", "downgrade", "pixel", "don", "laughing", "loud", "draw", "lucky")) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
@@ -928,7 +933,7 @@ ms2 <- as.matrix(tdm_s2)
 distMatrix_s <- dist(scale(ms2))
 fit_s <- hclust(distMatrix_s, method = "ward.D")
 plot(fit_s)
-rect.hclust(fit_s, k = 9,border = "red") # cut tree into 9 clusters
+rect.hclust(fit_s, k = 3, border = "red") # cut tree into 9 clusters
 ```
 
 ```{r Clustering Apple}
@@ -940,7 +945,7 @@ ma2 <- as.matrix(tdm_a2)
 distMatrix_a <- dist(scale(ma2))
 fit_a <- hclust(distMatrix_a, method = "ward.D")
 plot(fit_a)
-rect.hclust(fit_a, k = 9,border = "red") # cut tree into 9 clusters
+rect.hclust(fit_a, k = 3,border = "red") # cut tree into 9 clusters
 ```
 
 The two most talked about models are the iPhone 13 Pro Max and Samsung Galaxy S22 Ultra. All these terms are already mentioned in other parts of our analysis. Anyways, it is interesting that Apple tweets are more talking about phone cases and new Apple [product?] which "just" "can" "get", while Samsung tweets are comparing the new phone series in the first place to Apple products and apparently discuss about which has the best camera.
@@ -1574,6 +1579,7 @@ samsung.correlation.terms <- samsung.reviews.text %>%
   mutate(review = row_number()) %>%
   unnest_tokens(word, samsung.reviews.text) %>%
   filter(!word %in% stop_words$word) %>%
+  filter(!word %in% c("days", "protector")) %>%
   group_by(word) %>%
   filter(n() >=7)%>%
   pairwise_cor(word, review, sort = TRUE)
@@ -1597,7 +1603,7 @@ Which words are correlating with each other and what is it related to?
 
 -   **Snapdragon feature** means the [**Qualcomm Snapdragon 8 Gen 1**](https://www.androidauthority.com/qualcomm-snapdragon-8-gen-1-3063350/) is the processor that the S22 uses in the US models. Other countries in the world receive an Samsung S22 models which uses Samsung's own processor [**Qualcomm Snapdragon 8 Gen 1**](https://www.androidauthority.com/qualcomm-snapdragon-8-gen-1-3063350/).
 
--   **Fingerprint Reader** is Samsung's feature to unlock the phone. In contrast to the iPhone it still has a fingerprint reader instead of the Face ID but it doesn't have a scanner as a button but an ultrasonic screen that identifies the fingerprint.
+-   **Fingerprint Reader** is Samsung's feature to unlock the phone. In contrast to the iPhone it still has a fingerprint reader additional to the Face ID but it doesn't have a scanner as a button but an ultrasonic screen that identifies the fingerprint.
 
 -   **Software issues app** could be related to the scandal of Game Optimising Service (GOS) app that slows down more than 10 thousand apps.
 
@@ -1849,3 +1855,5 @@ Apple should introduce a Rose Quartz and/or Serenity (or a combination of both) 
 The highest advertising focus is on cameras at both product series. People also discuss cameras a lot, comparing both models about that and make purchase decisions accordingly. ["Differences in color [lie mainly in] temperature, depending on the scene. The Galaxy S22 Ultra tends to have a cooler tone, while the ‌iPhone 13 Pro‌ Max is warmer. The S22 Ultra also tends to elevate highlights, and while it can sometimes appear sharper, some may find the images to be a bit too washed out because of it."](https://www.macrumors.com/2022/03/03/galaxy-s22-ultra-vs-iphone-13-pro-max/) The zoom also tends to be in a higher resolution at Samsung S22. Apple has an ultra-wide angle while Samsung's is smaller. Apple introduced the new Cinematic mode, as already mentioned before, and is better in video recording quality. All feedback on the front camera of Apple is really negative while it is really positive on the rear camera. The rear camera is the one advertised by Apple. Therefore, people keep discussing about the pros and cons of each camera and its a tough decision depending on the neck-and-neck race. Definitely, both companies do good on working and improving the camera systems, for Apple, it should be the next move to improve the front camera's quality.
 
 In general, both phones are really highly advanced. "[While a couple of categories like performance and battery life are decisive victories for the iPhone, for the most part, this was a battle of inches](https://www.laptopmag.com/news/galaxy-s22-vs-iphone-13)". Companies should further promote the different aspects that make them unique, e.g. Samsung could advertise more about the S Pen and its compatibility with the tablet and both could put greater emphasis on the different unlock systems, e.g. Samsung has Face Unlocking system and a fingerprint sensor as options.
+
+Apple should stop selling iPhones on Amazon because customers are complaining about the customer service of Amazon because they do not give easy refunds or replacement for the product on the door step even if they promised but the procedures are really long and most likely to avoid the replacement.
