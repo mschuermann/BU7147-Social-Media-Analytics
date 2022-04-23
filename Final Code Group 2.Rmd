@@ -10,6 +10,8 @@ output:
 
 This is the analysis for the video submission in the module BU7147 Social Media Analytics of the programme M.Sc. Business Analytics at Trinity Business School. You can also find our code on Github under the following link: <https://github.com/mschuermann/Social-Media-Analytics>
 
+If one of the visualisations does not show labels or similar, please re-run the chunk and it should work.
+
 ## The Smartphone Market
 
 The global smartphone market has experienced multiple market leaders over the past few years. The only two major brands that remained over the years were Apple and Samsung. Those two brands are compared regularly and are competing over the market share. While Samsung was the market leader in the first three quarters in 2021. In September 2021, Apple released its new iPhone model with the generation 13 and gained market share, taking over the market leader position. In February 2022, Samsung also released the new model in its Galaxy series. Those two phones are the flagships in the current smartphone market.
@@ -64,37 +66,22 @@ Apple advertises the iPhone Pro with the following features:
 
 ## Comparison of Features
 
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 |                             | Samsung S22                                                                            | Apple iPhone 13                           |
-+=============================+========================================================================================+===========================================+
+|-----------------------------|----------------------------------------------------------------------------------------|-------------------------------------------|
 | **Starting Price**          | \$799                                                                                  | \$799                                     |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Screen size**             | 6.1 inches (2340 x 1080)                                                               | 6.1 inches (2532 x 1170)                  |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Refresh rate**            | 48Hz-120Hz adaptive                                                                    | 60Hz                                      |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **CPU**                     | Snapdragon 8 Gen 1 (US); Exynos 2200 (K)                                               | A15 Bionic                                |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **RAM**                     | 8GB                                                                                    | 4GB (based on teardowns)                  |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Storage**                 | 128GB, 256GB                                                                           | 128GB, 256GB, 512GB                       |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Rear cameras**            | 50MP wide (f/1.8); 12MP ultrawide (f/2.2); 10MP telephoto (f/2.4) with 3x optical zoom | 12MP main (f/1.6), 12MP ultrawide (f/2.4) |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Front camera**            | 10MP (f/2.2)                                                                           | 12MP (f/2.2)                              |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Battery size**            | 3,700 mAh                                                                              | 3,227 mAh (based on teardowns)            |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Battery life (Hrs:Mins)** | 7:51                                                                                   | 10:33                                     |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Charging speeds**         | 25W wired, 15W wireless                                                                | 20W wired; 15W wireless                   |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Size**                    | 5.7 x 2.8 x 0.3 inches                                                                 | 5.8 x 2.8 x 0.3 inches                    |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Weight**                  | 5.9 ounces                                                                             | 6.14 ounces                               |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 | **Colors**                  | Black, white, green, pink gold                                                         | Black, white, blue, pink, red, green      |
-+-----------------------------+----------------------------------------------------------------------------------------+-------------------------------------------+
 
 Source: <https://www.tomsguide.com/face-off/samsung-galaxy-s22-vs-iphone-13>
 
@@ -1197,6 +1184,8 @@ library(base64enc)
 # 
 # 
 # write.csv(output_list,"C:\\Users\\Shruthi\\OneDrive\\Documents\\Semester 2\\Social Media Analytics\\Group Assignment\\Samsung_Australia.csv",row.names = FALSE)
+
+### We repeated this step for Amazon UK, US, India for iPhone 13 models and Samsung S22 models.
 
 ```
 
