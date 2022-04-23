@@ -3,7 +3,7 @@ Group Assignment for BU7147 Social Media Analytics course at Trinity College Dub
 
 Group Members: Marie Lisanne Schürmann, Mohit Rathod, Shruthi Yamajala, Zhiyu Wu
 
-Our topic is the Analysis of the opinion about Samsung S22 and Apple iPhone 13 in Social Media and Reviews. 
+Our topic is the Analysis of the opinion about Samsung S22 and Apple iPhone 13 in Social Media and Product Reviews. 
 
 We used data from Twitter API and Amazon Reviews to get information towards our research objective.
 We used the following methods: Word Frequencies, Sentiment Analysis, Word Correlations, Clustering and LDA Topic Modelling. 
