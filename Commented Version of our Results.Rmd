@@ -1,11 +1,14 @@
 ---
-title: "Brand Analysis of Samsung S22 and Apple iPhone 13 Comparison"
+title: "Analysis of Samsung S22 and Apple iPhone 13"
 authors: Mohit Rathod, Shruthi Yamajala, Zhiyu Wu, Marie Lisanne Schürmann
+date: 23/04/2022
 output:
   html_notebook: default
 ---
 
 # Analysis of Samsung S22 and Apple iPhone 13
+
+This is the analysis for the video submission in the module BU7147 Social Media Analytics of the programme M.Sc. Business Analytics at Trinity Business School. You can also find our code on Github under the following link: <https://github.com/mschuermann/Social-Media-Analytics>
 
 ## The Smartphone Market
 
@@ -148,6 +151,10 @@ library(topicmodels)
 library(twitteR)
 library(widyr)
 library(wordcloud)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
 ```
 
 ```{r Setup twitter, include=FALSE}
@@ -739,15 +746,32 @@ tail(sentimentterms_s,10)
 
 s_bigram_with_neg_sentiment <- s_bigram_counted %>%
   mutate(weightage = sentiment*freq/sum(sentiment*freq)) %>%
-  filter(!bigrams %in% "phantom") %>%
+  filter(!bigrams %in% "phantom") %>% #phantom is not a bad word in this context but the colour of Samsung, so we filtered it out
   arrange(desc(weightage)) %>%
   tail(3)
 
-ggplot(s_bigram_with_neg_sentiment, aes(x=bigrams, y=-weightage))+
+s_bigram_sentiments <- rbind(s_bigram_with_sentiment, s_bigram_with_neg_sentiment)
+ggplot(s_bigram_sentiments, aes(x=bigrams, y=weightage))+
+  theme(axis.text = element_text(size = 15))+
+  geom_col()+
+  xlab("Word") +
+  ggtitle("Samsung - Top 3 Positive & Negative Words")
+
+
+
+s_plot_neg <- ggplot(s_bigram_with_neg_sentiment, aes(x=bigrams, y=weightage))+
   theme(axis.text = element_text(size = 5))+
   geom_col()+
   xlab("Negative Word") +
-  ggtitle("Samsung - Relative Importance of Negative Words")
+  ggtitle("Samsung - Negative Words")
+
+s_plot_pos <- ggplot(s_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
+  geom_col()+
+  theme(axis.text = element_text(size = 5))+
+  xlab("Positive Word") +
+  ggtitle("Samsung - Positive Words")
+
+grid.arrange(s_plot_pos, s_plot_neg, ncol=2)
 ```
 
 The word scandal is related to the GOS app that slowed Samsung phones down on purpose to save battery life without notifying the user about it, affecting the performance of over 10 thousand apps. This scandal seems to have the most negative impact on the sentiments of Samsung users.
@@ -781,11 +805,11 @@ a_bigram_with_sentiment <- a_bigram_counted %>%
   arrange(desc(weightage)) %>%
   top_n(3)
 
-ggplot(a_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
+a_plot_pos <- ggplot(a_bigram_with_sentiment, aes(x=bigrams, y=weightage))+
   theme(axis.text = element_text(size = 5))+
   geom_col()  +
   xlab("Positive Word") +
-  ggtitle("Apple - Relative Importance of Positive Words")
+  ggtitle("Apple - Positive Words")
 ```
 
 Positive words for Apple are seperated more evenly excluding the first one, while for Samsung the weightage of all the other positive words are relatively small other than the first two. Both the highest are "new" which indicates that people are discussing a lot to the newest model. More positive words for Apple are seemingly not that related to how people feel about the newsest model specifically but very general expression, while Samsung has more practical comments.
@@ -799,15 +823,16 @@ tail(sentimentterms_a,10)
 
 a_bigram_with_neg_sentiment <- a_bigram_counted %>%
   mutate(weightage = sentiment*freq/sum(sentiment*freq)) %>%
-  filter(!bigrams %in% c("downgrade", "fuck", "shit", "ass")) %>%
   arrange(desc(weightage)) %>%
   tail(3)
 
-ggplot(a_bigram_with_neg_sentiment, aes(x=bigrams, y=-weightage))+
+a_plot_neg <- ggplot(a_bigram_with_neg_sentiment, aes(x=bigrams, y=weightage))+
     theme(axis.text = element_text(size = 5))+
     geom_col()+
     xlab("Negative Word") +
-    ggtitle("Relative Importance of Negative Words")
+    ggtitle("Apple - Negative Words")
+
+grid.arrange(a_plot_pos, a_plot_neg, ncol=2)
 ```
 
 Negative words for Apple are mainly non-directional and more like a emotional vent which give little information about why people feel the negative way we detected about Apple, while we can clearly see Samsung is more or less affected by the scandal since there're many negative words around it.
